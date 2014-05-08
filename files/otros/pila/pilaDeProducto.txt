@@ -1,0 +1,36 @@
+USUARIO
+
+Como usuario se puede visualizar el catálogo de libros
+Como usuario se puede filtrar el catálogo de libros (busqueda)
+Como usuario se puede ver los detalles de un libro
+Como usuario se puede registrar en el sitio
+Como usuario se puede ver la seccion de ayuda
+Como usuario se puede ver la seccion de contacto
+? Como usuario se puede enviar mail desde la sección de contacto
+
+USUARIO REGISTRADO
+
+Como usuario registrado se puede iniciar sesión en el sitio
+Como usuario registrado se puede cerrar sesión en el sitio
+Como usuario registrado se puede pedir la contraseña por correo
+Como usuario registrado se puede modificar el perfil de usuario
+
+Como usuario registrado se puede agregar un libro al carrito de compra
+Como usuario registrado se puede efectuar la compra de los libros en el carrito.
+Como usuario registrado se puede ver el estado de pedidos
+Como usuario registrado se puede ver el historial de compras
+
+USUARIO ADMINISTRADOR
+
+Como administrador se puede modificar los datos de un usuario
+Como administrador se puede dar de baja a un usuario
+Como administrador se puede ver los registros de usuarios
+Como administrador se puede filtrar los registros de usuarios
+
+Como administrador se puede ver los pedidos de compras de libros
+Como administrador se puede filtrar los pedidos de compras de libros
+Como administrador se puede modificar el estado de un pedido de compra
+
+Como administrador se puede dar de alta un nuevo libro
+Como administrador se puede dar de baja un libro
+Como administrador se puede modificar los datos de un libro
