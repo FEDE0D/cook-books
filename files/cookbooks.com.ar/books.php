@@ -18,7 +18,6 @@
     <script src="datatables/js/currency-sort.js"></script>
     <!--OTROS-->
     <link href="custom.css" rel="stylesheet" />
-    <script src="scripts.js"></script>
     <?php include_once('database.php') ?>
   </head>
   <body>
@@ -43,6 +42,12 @@
 							</div>
 					 	</div>
 					</div>
+					<p>TODO: Dar formato a la tabla</p>
+					<ul>*Mostrar solo fecha, precio, autor y titulo <br>
+							*Hacer que la fila sea un link al libro<br>
+							*Cambiar campos del header<br>
+							*Testear los diferentes filtros (SRS)<br>
+					</ul>
 				</div>
 				<div class="col-md-10">
 					<div class="row">
@@ -58,8 +63,8 @@
 							<br />
 							<?php
 							//		INSERTA TABLA DE LIBROS
-							$usos = new DataBase;
-							$tabla = $usos->tableCatalogo();
+							$BOOKS = new Books;
+							$tabla = $BOOKS->getCatalogo();
 							echo $tabla;
 							?>							
 						</div>

@@ -1,8 +1,8 @@
 <?php
     include_once('database.php');
-	$usos = new DataBase;
+	$USERS = new Users;
 	
-	$usos->userRemoveLogin();
+	$USERS->removeLogin();
 	
-	header( 'Location: index.php' ) ;
+	header( 'Location: ./' ) ;
 ?>

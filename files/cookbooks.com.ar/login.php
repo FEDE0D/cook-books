@@ -1,14 +1,12 @@
 <?php
     include_once 'database.php';
     
-	$usos = new DataBase;
-	$exists = $usos->userExists2($_POST['username'], $_POST['password']);
+	$USERS = new Users;
 	
-	if ($exists){//es un usuario real, registrar sesión
-		$usos->userSaveLogin($_POST['username']);
-		header( 'Location: index.php' ) ;
+	if ($user = $USERS->userExists2($_POST['username'], $_POST['password'])){//es un usuario real, registrar sesión
+		$USERS->saveLogin($user);
+		header( 'Location: ./' ) ;
 	}else{//no es un usuario existente
-		//llevar a pagina de re-login
-		header( 'Location: index.php' ) ;
+		header( 'Location: relogin.php?err=true' ) ;
 	}
 ?>

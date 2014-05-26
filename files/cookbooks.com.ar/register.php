@@ -1,13 +1,12 @@
 <?php 
 	include_once('database.php');
-	$usos = new DataBase;
+	$USERS = new Users;
 	
 	
-	$login = $usos->userGetLogin();
-	if (isset($login)) header("location: ./");
+	$login = $USERS->getUserLogin();
+	if ($login) header("location: ./");
 	
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -38,7 +37,13 @@
                 				<div class="form-group">
                                     <label for="username" class="col-md-3 control-label">Usuario</label>
                                     <div class="col-md-9">
-                                        <input type="username" class="form-control" id="username" name="username" placeholder="Nombre de usuario" required="required">
+                                        <input type="username" class="form-control" id="username" name="username" placeholder="Nombre de usuario" autocomplete="off" required="required">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email" class="col-md-3 control-label">E-mail</label>
+                                    <div class="col-md-9">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Email" autocomplete="off" required="required">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -59,15 +64,49 @@
                                 </div>
                 			</form>
                 			<script>
-                				$("#registerForm").validate( 
+                				$("#registerForm").validate(
                 					{
                 						lang: 'es',
                 						rules: {
+                							username:{
+												required: true,
+								                minlength: 3,
+								                remote: {
+									                url: "ajax.php",
+									                data:{
+									                	type: 'user',
+									                	action: 'NAME_AVAILABLE'
+									                }
+								                }
+											},
+											email:{
+												required: true,
+												remote: {
+													url: "ajax.php",
+													data:{
+														type:'user',
+														action:'EMAIL_AVAILABLE'
+													}
+												}
+											},
 										    password1: "required",
 										    password2: {
 										    	equalTo: "#password1"
 											}
-										}
+										},
+										messages: {
+								            username:{
+								                remote: "Este nombre de usuario ya está registrado. Elige otro!"
+								            },
+								            email:{
+								            	remote: "Este email ya está registrado. Ingresa otro!"
+								            }
+								        }
+                					}
+                				);
+                				$(document).ready(
+                					function(){
+                						$("#registerForm").find("#username").focus();
                 					}
                 				);
                 			</script>
