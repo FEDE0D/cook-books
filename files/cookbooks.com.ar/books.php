@@ -44,9 +44,10 @@
 					</div>
 					<p>TODO: Dar formato a la tabla</p>
 					<ul>*Mostrar solo fecha, precio, autor y titulo <br>
-							*Hacer que la fila sea un link al libro<br>
-							*Cambiar campos del header<br>
-							*Testear los diferentes filtros (SRS)<br>
+						*Hacer que la fila sea un link al libro<br>
+						*Cambiar campos del header<br>
+						*Testear los diferentes filtros (SRS)<br>
+						*Transformar catalogo a una Clase<br />
 					</ul>
 				</div>
 				<div class="col-md-10">
@@ -64,8 +65,7 @@
 							<?php
 							//		INSERTA TABLA DE LIBROS
 							$BOOKS = new Books;
-							$tabla = $BOOKS->getCatalogo();
-							echo $tabla;
+							echo $BOOKS->getCatalogo();
 							?>							
 						</div>
 					</div>

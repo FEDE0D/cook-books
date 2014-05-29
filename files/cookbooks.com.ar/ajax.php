@@ -13,8 +13,9 @@
  *						REMOVE: saca un libro del carrito.
  *						EMPTY: vacía el carrito.
  * 
- * 		type: author =>	ADD: agrega un nuevo autor
+ * 		type: author =>	NEW: agrega un nuevo autor. recibe los datos y retorna ID|false si el alta fue correcta.
  * 						UPDATE: modifica un autor. recibe los datos y retorna true|false si la modificación fue correcta.
+ * 						REMOVE: eliminar un autor (baja lógica). recibe un ID, retorna true|false si la baja fue correcta.
  *	]
  * 
  */
@@ -55,17 +56,18 @@
 			}
 				
 			$CART->saveCart();
-		}else if ($_REQUEST['type']=='author'){//AUTHOR
+		}else if ($_REQUEST['type']=='author'){//	AUTHOR
+			$id = isset($_REQUEST['auth_id'])? $_REQUEST['auth_id']:'';
+			$nombre = isset($_REQUEST['auth_nombre'])? $_REQUEST['auth_nombre']:'';
+			$apellido = isset($_REQUEST['auth_apellido'])? $_REQUEST['auth_apellido']:'';
+			$fecha_n = isset($_REQUEST['auth_fecha_n'])? $_REQUEST['auth_fecha_n']:'';
+			$lugar_n = isset($_REQUEST['auth_lugar_n'])? $_REQUEST['auth_lugar_n']:'';
+			
 			if (isset($_REQUEST['action'])){
-				if ($_REQUEST['action']=='ADD'){
-					
-				}else if ($_REQUEST['action']=='UPDATE'){
-					$id = isset($_REQUEST['auth_id'])? $_REQUEST['auth_id']:'';
-					$nombre = isset($_REQUEST['auth_nombre'])? $_REQUEST['auth_nombre']:'';
-					$apellido = isset($_REQUEST['auth_apellido'])? $_REQUEST['auth_apellido']:'';
-					$fecha_n = isset($_REQUEST['auth_fecha_n'])? $_REQUEST['auth_fecha_n']:'';
-					$lugar_n = isset($_REQUEST['auth_lugar_n'])? $_REQUEST['auth_lugar_n']:'';
-					
+				if ($_REQUEST['action']=='NEW'){//	agregar nuevo autor
+					$autor = Authors::newAuthor($nombre, $apellido, $fecha_n, $lugar_n);
+					echo $autor? $autor->getID():'false';
+				}else if ($_REQUEST['action']=='UPDATE'){//	actualizar autor
 					$autor = Authors::getAuthor($id);
 					if ($autor){
 						//Modifico el autor y lo guardo
@@ -73,19 +75,15 @@
 						$autor->setApellido($apellido);
 						$autor->setFechaNacimiento($fecha_n);
 						$autor->setLugarNacimiento($lugar_n);
-						if ($autor->save()){
-							echo 'true';
-						}else{
-							echo 'false';
-						}
+						echo $autor->save()? 'true':'false';
 					}else{
 						echo 'false';
 					}
-					return;
+				}else if ($_REQUEST['action']=='REMOVE'){// eliminar autor
+					//obtener objeto Author, setEliminado() y save()
 				}
 			}
 			
 		}
 	}
-
 ?>

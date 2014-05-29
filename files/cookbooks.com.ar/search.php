@@ -1,3 +1,8 @@
+<?php
+	$QUERY = NULL;	if (isset($_REQUEST['query'])) $QUERY = $_REQUEST['query'];
+	$ID_AUTHOR = NULL;	if (isset($_REQUEST['authID'])) $ID_AUTHOR = $_REQUEST['authID'];
+	$ID_LANG = NULL;	if (isset($_REQUEST['langID'])) $ID_LANG = $_REQUEST['langID'];
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -17,11 +22,13 @@
                 </div>
                 <div class="col-md-8">
                 	<h1>Search page</h1>
-                	<?php
-                		if (isset($_REQUEST['query'])){
-                			echo "<h2>Query: \"".$_REQUEST['query']."\"</h2>";
-                		}
-                	?>
+                	<h2>
+                		<?php
+                			echo "Query = \"".$QUERY."\" <br>";
+							echo "Author ID = \"".$ID_AUTHOR."\" <br>";
+							echo "Language ID = \"".$ID_LANG."\" <br>";
+                		?> 
+                	</h2>
                 </div>
                 <div class="col-md-2">
                 	

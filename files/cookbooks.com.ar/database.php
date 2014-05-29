@@ -54,6 +54,10 @@ class Conexion {
 		return $this->dbh->errorInfo();
 	}
 	
+	function getLastInsertedID(){
+		return $this->dbh->lastInsertId();
+	}
+	
 	/*
 	 * CONSULTAS SELECT
 	 */
@@ -303,17 +307,22 @@ class User{
 
 class Books{
 	
-	private $conexion;
+	static private $conexion;
+	static private $initialized = false;
 	
-	/** Constructor */
-	function __construct(){
-		$this->conexion = new Conexion;
-		if (!$this->conexion->conectar())	die ('<p>Error al crear objeto conexion</p><p>Ver variable $local</p>');
+	function __construct(){}
+	
+	static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
+		self::$initialized = TRUE;
 	}
 	
 	/**Devuelve un objeto Book o NULL si no existe*/
-	function getBook($bookISBN){
-		$result = $this->conexion->query("SELECT * FROM libros WHERE ISBN='$bookISBN' ");
+	static function getBook($bookISBN){
+		self::initialize();
+		$result = self::$conexion->query("SELECT * FROM libros WHERE ISBN='$bookISBN' ");
 		if ($result){
 			$bookInfo = $result->fetchAll(PDO::FETCH_ASSOC);
 			return new Book($bookInfo[0]);
@@ -322,9 +331,10 @@ class Books{
 	}
 	
 	/** Devuelve un Array de objetos Book */
-	function getBestSellers($cantidad){
-		$result = $this->conexion->query(" 
-			SELECT L.ISBN, L.titulo, concat(A.nombre,' ',A.apellido) as autor, L.paginas, L.precio, I.nombre as idioma, L.fecha, L.etiquetas, L.texto, L.tapa
+	static function getBestSellers($cantidad){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT L.ISBN, L.titulo, L.AUTOR, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa
 			FROM libros L
 			LEFT JOIN autor A ON (L.AUTOR=A.ID)
 			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
@@ -340,27 +350,51 @@ class Books{
 		return (Array)$resultado;
 	}
 	
-	/** Devuelve la tabla de libros lista para mostrar en la pagina del catalogo (books.php) */
-	function getCatalogo(){
-		$result = $this->conexion->query("
+	/** Devuelve la tabla de libros lista para mostrar en la pagina del catalogo (books.php)
+		NOTAR: Concatenación de campos y cambio de nombre de columnas! */
+	static function getCatalogo(){
+		self::initialize();
+		$result = self::$conexion->query("
 			SELECT L.ISBN, L.titulo, concat(A.nombre,' ',A.apellido) as autor, L.paginas, L.precio, I.nombre as idioma, L.fecha, L.etiquetas
 			FROM libros L
 			LEFT JOIN autor A ON (L.AUTOR=A.ID)
 			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
 			ORDER BY ISBN
 		");
-		return $this->conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
+		return self::$conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
 	}
+	
+	/** Retorna un array con objetos Book de ese autor */
+	static function getBooksBy($author_id){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT L.ISBN, L.titulo, L.AUTOR, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa
+			FROM autor A
+			INNER JOIN libros L ON (A.ID=L.AUTOR)
+			WHERE (A.ID=$author_id)
+		");
+		$books = Array();
+		if ($result){
+			if ($result->rowCount()>0){
+				$rows = $result->fetchAll(PDO::FETCH_ASSOC);
+				foreach ($rows as $num => $row) {
+					array_push($books, new Book($row));
+				}
+			}
+		}
+		return $books;
+	}
+	
 }
 
 class Book{
 	
 	private	$ISBN,
 			$titulo,
-			$autor,
+			$autor_ID,
 			$paginas,
 			$precio,
-			$idioma,
+			$idioma_ID,
 			$fecha,
 			$etiquetas,
 			$texto,
@@ -369,10 +403,10 @@ class Book{
 	function __construct($param){
 		$this->ISBN = $param['ISBN'];
 		$this->titulo = $param['titulo'];
-		$this->autor = $param['autor'];
+		$this->autor_ID = $param['AUTOR'];
 		$this->paginas = $param['paginas'];
 		$this->precio = $param['precio'];
-		$this->idioma = $param['idioma'];
+		$this->idioma_ID = $param['IDIOMA'];
 		$this->fecha = $param['fecha'];
 		$this->etiquetas = $param['etiquetas'];
 		$this->texto = $param['texto'];
@@ -383,10 +417,10 @@ class Book{
 	function printBook(){
 		echo $this->ISBN."<br>";
 		echo $this->titulo."<br>";
-		echo $this->autor."<br>";
+		echo $this->autor_ID."<br>";
 		echo $this->paginas."<br>";
 		echo $this->precio."<br>";
-		echo $this->idioma."<br>";
+		echo $this->idioma_ID."<br>";
 		echo $this->fecha."<br>";
 		echo $this->etiquetas."<br>";
 		echo $this->texto."<br>";
@@ -401,8 +435,13 @@ class Book{
 		return $this->titulo;
 	}
 	
+	function getAutor_ID(){
+		return $this->autor_ID;
+	}
+	
+	/** Retorna un objeto Author */
 	function getAutor(){
-		return $this->autor;
+		return Authors::getAuthor($this->getAutor_ID());
 	}
 	
 	function getPaginas(){
@@ -413,8 +452,13 @@ class Book{
 		return $this->precio;
 	}
 	
+	function getIdioma_ID(){
+		return $this->idioma_ID;
+	}
+	
+	/** Retorna un objeto idioma */
 	function getIdioma(){
-		return $this->idioma;
+		return Idiomas::getIdioma($this->getIdioma_ID());
 	}
 	
 	function getFecha(){
@@ -516,6 +560,37 @@ class Authors{
 		return FALSE;
 	}
 	
+	/** Retorna un objeto Author si pudo agregar a la base de datos, NULL caso contrario */
+	public static function newAuthor($nombre, $apellido, $fecha_nacimiento, $lugar_nacimiento){
+		self::initialize();
+		$result = self::$conexion->query("
+			INSERT 
+			INTO autor (
+				`ID`,
+				`nombre`,
+				`apellido`,
+				`fecha_nacimiento`,
+				`lugar_nacimiento`,
+				`eliminado`
+				)
+			VALUES(
+				NULL,
+				'$nombre',
+				'$apellido',
+				'$fecha_nacimiento',
+				'$lugar_nacimiento',
+				'0'
+			)
+		");
+		if ($result){
+			$id = self::$conexion->getLastInsertedID();
+			return Authors::getAuthor($id);
+		}else{
+			print_r(self::$conexion->getLastError());
+			return NULL;
+		}
+	}
+	
 }
 
 class Author{
@@ -571,6 +646,11 @@ class Author{
 	
 	function getApellidoNombre(){
 		return $this->apellido.' '.$this->nombre;
+	}
+	
+	/** Retorna un array de Book */
+	function getBooks(){
+		return Books::getBooksBy($this->ID);
 	}
 	
 	function setNombre($nombre){
@@ -747,6 +827,59 @@ class Cart{
 	/** Imprime el carrito. Solo para debug. */
 	function printCart(){
 		print_r($this->articulos);
+	}
+	
+}
+
+class Idiomas{
+	
+	static private $conexion;
+	static private $initialized = FALSE;
+	
+	function __construct(){}
+	
+	static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
+		self::$initialized = TRUE;
+	}
+	
+	static function getIdioma($id){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT *
+			FROM idioma
+			WHERE (ID=$id)
+			LIMIT 1
+		");
+		if ($result){
+			if ($result->rowCount()>0){
+				return new Idioma($result->fetch(PDO::FETCH_ASSOC));
+			}
+			return NULL;
+		}
+		return NULL;
+	}
+	
+}
+
+class Idioma{
+	
+	private	$ID,
+			$nombre;
+	
+	function __construct($params){
+		$this->ID = $params['ID'];
+		$this->nombre = $params['nombre'];
+	}
+	
+	function getID(){
+		return $this->ID;
+	}
+	
+	function getNombre(){
+		return $this->nombre;
 	}
 	
 }

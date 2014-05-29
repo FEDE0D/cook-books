@@ -8,13 +8,13 @@
 	<body>
 		<?php
 			include_once('database.php');
-			include_once 'shopcart.php';
 			$cart = new Cart;
 			
 		?>
 		
 		<button onclick="printCarrito()">CART PRINT</button><br>
 		<button onclick="agregarACarrito()">CART ADD</button><br>
+		<button onclick="nuevoAutor()">NEW AUTHOR</button><br>
 		<script>
 			function agregarACarrito(){
 				$.ajax({
@@ -37,6 +37,24 @@
 					data:{
 						type: "cart",
 						action: "PRINT"
+					},
+					success:function(data){
+						$("#result").html(data);
+					}
+				});
+			}
+			function nuevoAutor(){
+				$.ajax({
+					url:"ajax.php",
+					type:"POST",
+					data:{
+						type: "author",
+						action: "NEW",
+						auth_id: "",
+						auth_nombre: "nuevo",
+						auth_apellido: "nuevoApellido",
+						auth_fecha_n: "",
+						auth_lugar_n: ""
 					},
 					success:function(data){
 						$("#result").html(data);

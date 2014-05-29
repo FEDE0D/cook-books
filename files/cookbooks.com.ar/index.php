@@ -45,9 +45,9 @@
 										<td class="text-left resaltado" onclick="location='product.php?id=<?php echo $book->getISBN() ?>'">
 											<div class="col-md-3"><img src="books/img/tapas/<?php echo $book->getTapa() ?>" class="img-rounded img-responsive" style="margin: 0 auto; height: 80px;"></div>
 											<div class="col-md-9">
-												<strong>Título</strong>: <?php echo $book->getTitulo() ?></br>
-												<strong>Autor</strong>: <?php echo $book->getAutor() ?></br>
-												<strong>Idioma</strong>: <?php echo $book->getIdioma() ?>
+												<strong>Título</strong>: <?php echo $book->getTitulo(); ?></br>
+												<strong>Autor</strong>: <?php echo $book->getAutor()->getNombre(); ?></br>
+												<strong>Idioma</strong>: <?php echo $book->getIdioma()->getNombre(); ?>
 											</div>
 										</td>
 										<td>$ <?php echo $book->getPrecio() ?><br>
