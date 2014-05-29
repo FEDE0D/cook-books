@@ -1,3 +1,12 @@
+<?php include_once('database.php'); ?>
+<?php
+	//SOLO UN ADMINISTRADOR PUEDE VER ESTA PAGINA
+	$Users = new Users;
+	$user = $Users->getUserLogin();
+	if (!$user || !$user->getIsAdministrator()){
+		Errors::error("Sin privilegios", "No tienes privilegios para ver esta pagina!");
+	}
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -10,14 +19,6 @@
     </head>
     <body>
         <?php include_once('navigation.php'); ?>
-        <?php
-        	//SOLO UN ADMINISTRADOR PUEDE VER ESTA PAGINA
-        	$Users = new Users;
-			$user = $Users->getUserLogin();
-			if (!$user || !$user->getIsAdministrator()){
-				Errors::error("Sin privilegios", "No tienes privilegios para ver esta pagina!");
-			}
-        ?>
         <?php
         	//Guardo el id del autor activo, muestro los datos de ese autor y preparo para actualizar.
         	//Guardo la opcion de autor nuevo, muestro un formulario vacio y preparo para agregar.
@@ -95,13 +96,13 @@
 														auth_lugar_n: $('#author_form').find('#auth_birthplace').val()
 													},
 													success:function(data){
-														if (data=='false'){
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.');
-															$('#error_alert').removeClass("hidden");
-														}else{
+														if(data=='true'){
 															$('#error_alert').text('');
 															$('#error_alert').addClass("hidden");
 															location.reload();
+														}else{
+															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n');
+															$('#error_alert').removeClass("hidden");
 														}
 														$('#btn_save').button('reset');
 													}

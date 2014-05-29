@@ -128,7 +128,7 @@ class Users{
 	/** Constructor */
 	function __construct(){
 		$this->conexion = new Conexion;
-		if (!$this->conexion->conectar())	die ('<p>Error al crear objeto conexion</p>');
+		if (!$this->conexion->conectar()) Errors::error("No se pudo conectar a la base de datos", "Error al conectarse a la base de datos. Intente nuevamente.");
 	}
 	
 	/** Retorna la tabla de los usuarios completa */
@@ -582,6 +582,7 @@ class Author{
 	}
 
 	function setFechaNacimiento($fechaNacimiento){
+		if($fechaNacimiento=='') $fechaNacimiento='0000-00-00';
 		$this->fecha_nacimiento=$fechaNacimiento;
 	}
 	
