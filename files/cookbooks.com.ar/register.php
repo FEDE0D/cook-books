@@ -4,7 +4,9 @@
 	
 	
 	$login = $USERS->getUserLogin();
-	if ($login) header("location: ./");
+	if ($login){
+		Errors::error("Estás logueado!", "Por favor deslogueate y luego intenta registrarte de nuevo.");
+	}
 	
 ?>
 <!DOCTYPE html>

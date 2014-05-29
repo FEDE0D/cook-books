@@ -51,33 +51,39 @@
 											</div>
 										</td>
 										<td>$ <?php echo $book->getPrecio() ?><br>
-											<?php if ($user = $USERS->getUserLogin()){?>
-												<button 
-													value="<?php echo $book->getISBN();?>"
-													data-loading-text="Espere..."
-													onclick="
-														<?php
-														//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
-														echo ("
-															var btn = $(this);
-															var btnCart = $('#cartButton');
-            												btnCart.button('loading');
-															btn.button('loading');
-															$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
-																function(data){
-																	$.post('navigation.php').done(
-																		function(navbar){
-																			$('#navigationWrapper').replaceWith(navbar);
-																			btn.button('reset');
-																		}
-																	);
-																}
-															);"
-														);
-														?>
-													">Comprar
-												</button>
-											<?php } ?>
+											<?php
+											if ($user = $USERS->getUserLogin()){
+												if (!$user->getIsAdministrator()){
+												?>
+													<button 
+														value="<?php echo $book->getISBN();?>"
+														data-loading-text="Espere..."
+														onclick="
+															<?php
+															//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
+															echo ("
+																var btn = $(this);
+																var btnCart = $('#cartButton');
+	            												btnCart.button('loading');
+																btn.button('loading');
+																$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
+																	function(data){
+																		$.post('navigation.php').done(
+																			function(navbar){
+																				$('#navigationWrapper').replaceWith(navbar);
+																				btn.button('reset');
+																			}
+																		);
+																	}
+																);"
+															);
+															?>
+														">Comprar
+													</button>
+												<?php 
+												}
+											}
+											?>
 										</td>
 									</tr>
 									<?php

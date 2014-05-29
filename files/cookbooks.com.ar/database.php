@@ -323,7 +323,13 @@ class Books{
 	
 	/** Devuelve un Array de objetos Book */
 	function getBestSellers($cantidad){
-		$result = $this->conexion->query("SELECT * FROM libros LIMIT $cantidad");
+		$result = $this->conexion->query(" 
+			SELECT L.ISBN, L.titulo, concat(A.nombre,' ',A.apellido) as autor, L.paginas, L.precio, I.nombre as idioma, L.fecha, L.etiquetas, L.texto, L.tapa
+			FROM libros L
+			LEFT JOIN autor A ON (L.AUTOR=A.ID)
+			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
+			LIMIT $cantidad
+		");
 		$resultado = Array();
 		if ($result){
 			$books = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -336,7 +342,13 @@ class Books{
 	
 	/** Devuelve la tabla de libros lista para mostrar en la pagina del catalogo (books.php) */
 	function getCatalogo(){
-		$result = $this->conexion->query('SELECT ISBN, titulo, autor, paginas, precio, idioma, fecha, etiquetas FROM libros ORDER BY ISBN');
+		$result = $this->conexion->query("
+			SELECT L.ISBN, L.titulo, concat(A.nombre,' ',A.apellido) as autor, L.paginas, L.precio, I.nombre as idioma, L.fecha, L.etiquetas
+			FROM libros L
+			LEFT JOIN autor A ON (L.AUTOR=A.ID)
+			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
+			ORDER BY ISBN
+		");
 		return $this->conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
 	}
 }
@@ -421,6 +433,165 @@ class Book{
 		return $this->tapa;
 	}
 
+	
+}
+
+class Authors{
+	
+	static private $initialized = FALSE;
+	static private $conexion;
+	
+	
+	/** Constructor */
+	private function __construct(){}
+	
+	private static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
+		self::$initialized = TRUE;
+	}
+	
+	/** Retorna un array de Author con todos los autores no eliminados del sistema */
+	public static function getAuthors(){
+		self::initialize();
+		$result =  self::$conexion->query("
+			SELECT *
+			FROM autor
+			WHERE (eliminado=0)
+			ORDER BY apellido
+		");
+		$authors = array();
+		if ($result){
+			$authorsData = $result->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($authorsData as $key => $info) {
+				array_push($authors, new Author($info));
+			}
+		}
+		return $authors;
+	}
+	
+	/** Retorna un objeto Author si existe un autor en la base de dato, NULL caso contrario*/
+	public static function getAuthor($ID){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT *
+			FROM autor
+			WHERE (ID=$ID)AND(eliminado=0)
+			LIMIT 1
+		");
+		if ($result && $result->rowCount()>0) return new Author($result->fetch(PDO::FETCH_ASSOC));
+		else return NULL;
+	}
+	
+	/** Modifica los datos de un autor pasado por parametro en la base de datos. Retorna true si pudo modificar, false en caso contrario*/
+	public static function updateAuthor(Author $author){
+		self::initialize();
+		
+		$id = $author->getID();
+		$nombre = $author->getNombre();
+		$apellido = $author->getApellido();
+		$fecha_n = $author->getFechaNacimiento();
+		$lugar_n = $author->getLugarNacimiento();
+		$eliminado = $author->getEliminado();
+		
+		$result = self::$conexion->query("
+			UPDATE  autor
+			SET nombre = '$nombre',
+			apellido = '$apellido',
+			fecha_nacimiento = '$fecha_n',
+			lugar_nacimiento = '$lugar_n',
+			eliminado = '$eliminado'
+			WHERE (ID = $id)
+		");
+		if ($result){
+			// if ($result->rowCount()==1){
+				// return TRUE;
+			// }else{
+				// print_r($result->rowCount());
+				// return FALSE;
+			// }
+			return TRUE;
+		}
+		return FALSE;
+	}
+	
+}
+
+class Author{
+	
+	private	$ID,
+			$nombre,
+			$apellido,
+			$fecha_nacimiento,
+			$lugar_nacimiento,
+			$eliminado;
+			
+	function __construct($params){
+		$this->ID = $params['ID'];
+		$this->nombre = $params['nombre'];
+		$this->apellido = $params['apellido'];
+		$this->fecha_nacimiento = $params['fecha_nacimiento'];
+		$this->lugar_nacimiento = $params['lugar_nacimiento'];
+		$this->eliminado = $params['eliminado'];
+	}
+	
+	/** Guarda este autor en la base de datos (sobreescribiendo los datos viejos). Retorna true si la modificación tuvo éxito, false caso contrario. */
+	function save(){
+		return Authors::updateAuthor($this);
+	}
+	
+	function getID(){
+		return $this->ID;
+	}
+	
+	function getNombre(){
+		return $this->nombre;
+	}
+	
+	function getApellido(){
+		return $this->apellido;
+	}
+	
+	function getFechaNacimiento(){
+		return $this->fecha_nacimiento;
+	}
+	
+	function getLugarNacimiento(){
+		return $this->lugar_nacimiento;
+	}
+	
+	function getEliminado(){
+		return $this->eliminado;
+	}
+	
+	function getNombreApellido(){
+		return $this->nombre.' '.$this->apellido;
+	}
+	
+	function getApellidoNombre(){
+		return $this->apellido.' '.$this->nombre;
+	}
+	
+	function setNombre($nombre){
+		$this->nombre=$nombre;
+	}
+	
+	function setApellido($apellido){
+		$this->apellido=$apellido;
+	}
+
+	function setFechaNacimiento($fechaNacimiento){
+		$this->fecha_nacimiento=$fechaNacimiento;
+	}
+	
+	function setLugarNacimiento($lugarNacimiento){
+		$this->lugar_nacimiento=$lugarNacimiento;
+	}
+	
+	function setEliminado($num){
+		$this->eliminado = $num;
+	}
 	
 }
 
@@ -579,6 +750,15 @@ class Cart{
 	
 }
 
-
+class Errors{
+	
+	public static function error($title, $body){
+		if (session_status() == PHP_SESSION_NONE) session_start();
+		$_SESSION['error_title'] = $title;
+		$_SESSION['error_info'] = $body;
+		header("Location: error.php");
+	}
+	
+}
 
 ?>

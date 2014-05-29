@@ -37,30 +37,46 @@
 				</form>
 				
 				<ul class="nav navbar-nav navbar-right">
-					<?php if ($user = $USERS->getUserLogin()){ 
-						//TODO: Tener en cuenta los tipos de usuarios: USER / ADMIN
-						?>
-			            <li class="dropdown">
-			                <a id="cartButton" href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" rel="tooltip" data-placement="bottom" title="Ver carrito" data-loading-text="Espere...">
-			                    <span class="badge" id="cartSize"><?php echo $CART->sizeCart() ?></span> <span class="glyphicon glyphicon-shopping-cart"></span>
-			                </a>
-			                <?php if ($CART->sizeCart()>0){ ?>
-			                <ul id="cartMenu" class="dropdown-menu dropdown-menu-right" role="menu">
-			                	<?php $CART->printCartHTML(); ?>
-			                </ul>
-			                <?php } ?>
-			            </li>
-			            <li class="dropdown">
-			                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>&nbsp;<?php echo $user->getUsername(); ?>&nbsp;<b class="caret"></b></a>
-			                <ul class="dropdown-menu">
-			                    <li><a href="history.php"><span class="glyphicon glyphicon-time"></span> Ver el estado de mis compras</a></li>
-			                    <li class="divider"></li>
-			                    <li><a href="profile.php"><span class="glyphicon glyphicon-wrench"></span> Editar perfil</a></li>
-			                    <li class="divider"></li>
-			                    <li><a href="logout.php"><span class="glyphicon glyphicon-off"></span> Cerrar sesión</a></li>
-			                </ul>
-			            </li>
-		            <?php }else{ ?>
+					<?php 
+					if ($user = $USERS->getUserLogin()){
+					?>
+				            <?php
+				            if (!$user->getIsAdministrator()){
+				            ?>
+					            <li class="dropdown">
+					                <a id="cartButton" href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" rel="tooltip" data-placement="bottom" title="Ver carrito" data-loading-text="Espere...">
+					                    <span class="badge" id="cartSize"><?php echo $CART->sizeCart() ?></span> <span class="glyphicon glyphicon-shopping-cart"></span>
+					                </a>
+					                <?php if ($CART->sizeCart()>0){ ?>
+					                <ul id="cartMenu" class="dropdown-menu dropdown-menu-right" role="menu">
+					                	<?php $CART->printCartHTML(); ?>
+					                </ul>
+					                <?php } ?>
+					            </li>
+				            <?php
+							}
+							?>
+				            <li class="dropdown">
+				                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>&nbsp;<?php echo $user->getUsername(); ?>&nbsp;<b class="caret"></b></a>
+				                <ul class="dropdown-menu">
+				                	<?php if ($user->getIsAdministrator()){ ?>
+				                		<li><a href="#"><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Administrar usuarios</a></li>
+				                		<li class="divider"></li>
+				                		<li><a href="#"><span class="glyphicon glyphicon-book"></span>&nbsp;&nbsp;&nbsp;Administrar libros</a></li>
+				                		<li class="divider"></li>
+				                		<li><a href="admin_authors.php"><span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;&nbsp;Administrar autores</a></li>
+					                    <li class="divider"></li>
+				                	<?php }else{ ?>
+					                    <li><a href="history.php"><span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;&nbsp;Ver el estado de mis compras</a></li>
+					                    <li class="divider"></li>
+					                    <li><a href="profile.php"><span class="glyphicon glyphicon-wrench"></span>&nbsp;&nbsp;&nbsp;Editar perfil</a></li>
+					                    <li class="divider"></li>
+				                    <?php } ?>
+				                    <li><a href="logout.php"><span class="glyphicon glyphicon-off"></span>&nbsp;&nbsp;&nbsp;Cerrar sesión</a></li>
+				                </ul>
+				            </li>
+		            <?php
+		            }else{ ?>
 				        <li><a href="register.php">Registrarse</a></li>
 				        <li class="dropdown">
 				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown"> Iniciar Sesión <b class="caret"></b></a>

@@ -1,6 +1,9 @@
 <?php
-	$title = (isset($_REQUEST['error_title']))? $_REQUEST['error_title'] : '';
-	$info =  (isset($_REQUEST['error_info']))? $_REQUEST['error_info'] : '';
+	if (session_status() == PHP_SESSION_NONE) session_start();
+	$title = (isset($_SESSION['error_title']))? $_SESSION['error_title'] : '';
+	$info =  (isset($_SESSION['error_info']))? $_SESSION['error_info'] : '';
+	unset($_SESSION['error_title']);
+	unset($_SESSION['error_info']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -27,7 +30,7 @@
 	                				<?php echo $info; ?>
 	                			</div>
                 			<?php }?>
-                			<a class="btn btn-danger pull-right">Volver</a>
+                			<a class="btn btn-danger pull-right" href="./">Volver</a>
                 		</div>
             		</div>
     			</div>

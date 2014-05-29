@@ -3,7 +3,7 @@
 /*
  * 
  * Los pedidos que reciba esta pagina deben tener el siguiente formato
- * 	type = [user | cart]
+ * 	type = [user | cart | author]
  * 	action = [
  *		type: user => 	EXISTS: retorna true|false si un usuario existe.
  * 						NAME_AVAILABLE: retorna true|false si ese nombre de usuario está tomado.
@@ -12,6 +12,9 @@
  *	  	type: cart => 	ADD: agrega un libro al carrito.
  *						REMOVE: saca un libro del carrito.
  *						EMPTY: vacía el carrito.
+ * 
+ * 		type: author =>	ADD: agrega un nuevo autor
+ * 						UPDATE: modifica un autor. recibe los datos y retorna true|false si la modificación fue correcta.
  *	]
  * 
  */
@@ -52,6 +55,36 @@
 			}
 				
 			$CART->saveCart();
+		}else if ($_REQUEST['type']=='author'){//AUTHOR
+			if (isset($_REQUEST['action'])){
+				if ($_REQUEST['action']=='ADD'){
+					
+				}else if ($_REQUEST['action']=='UPDATE'){
+					$id = isset($_REQUEST['auth_id'])? $_REQUEST['auth_id']:'';
+					$nombre = isset($_REQUEST['auth_nombre'])? $_REQUEST['auth_nombre']:'';
+					$apellido = isset($_REQUEST['auth_apellido'])? $_REQUEST['auth_apellido']:'';
+					$fecha_n = isset($_REQUEST['auth_fecha_n'])? $_REQUEST['auth_fecha_n']:'';
+					$lugar_n = isset($_REQUEST['auth_lugar_n'])? $_REQUEST['auth_lugar_n']:'';
+					
+					$autor = Authors::getAuthor($id);
+					if ($autor){
+						//Modifico el autor y lo guardo
+						$autor->setNombre($nombre);
+						$autor->setApellido($apellido);
+						$autor->setFechaNacimiento($fecha_n);
+						$autor->setLugarNacimiento($lugar_n);
+						if ($autor->save()){
+							echo 'true';
+						}else{
+							echo 'false';
+						}
+					}else{
+						echo 'false';
+					}
+					return;
+				}
+			}
+			
 		}
 	}
 
