@@ -80,7 +80,21 @@
 						echo 'false';
 					}
 				}else if ($_REQUEST['action']=='REMOVE'){// eliminar autor
-					//obtener objeto Author, setEliminado() y save()
+					$autor = Authors::getAuthor($id);
+					if ($autor){
+						if (count($autor->getBooks())==0){
+							$autor->setEliminado(1);
+							if ($autor->save()){
+								echo 'true';
+							}else{
+								echo 'false';
+							}
+						}else{
+							echo 'false';
+						}
+					}else{
+						echo 'false';
+					}
 				}
 			}
 			

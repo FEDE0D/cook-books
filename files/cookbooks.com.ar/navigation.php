@@ -79,10 +79,23 @@
 		            }else{ ?>
 				        <li><a href="register.php">Registrarse</a></li>
 				        <li class="dropdown">
-				        	<a href="#" class="dropdown-toggle" data-toggle="dropdown"> Iniciar Sesión <b class="caret"></b></a>
+				        	<a id="loginDropdown" href="#" class="dropdown-toggle" data-toggle="dropdown" > Iniciar Sesión <b class="caret"></b></a>
+				        	<script>
+				        		$('#loginDropdown').click(
+				        			//Por alguna razón .focus() funciona solo usando timeout.
+				        			function(){
+				        				setTimeout(
+				        					function(){
+				        						$('#formLogin').find('#username').focus();
+				        					},
+				        					0
+				        				);
+				        			}
+				        		);
+				        	</script>
 				          	<ul class="dropdown-menu" style="padding: 8px;">
 					          	<form class="form" id="formLogin" action="login.php" method="post"> 
-					            	<input name="username" id="username" type="text" placeholder="Username" autocomplete="off" style="margin: 6px;"> 
+					            	<input name="username" id="username" type="text" placeholder="Username" autocomplete="off" style="margin: 6px;" > 
 					                <input name="password" id="password" type="password" placeholder="Password" style="margin: 6px"><br>
 					                <button type="submit" id="btnLogin" class="pull-right" style="margin: 6px">Iniciar sesión</button>
 								</form>

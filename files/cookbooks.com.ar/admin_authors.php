@@ -62,7 +62,7 @@
                 			<div class="container-fluid">
 	                			<a class="btn btn-sm btn-default pull-left" onclick="window.location.href='admin_authors.php?new=1'">Nuevo autor</a>
 	                			<?php if($AUTOR && count($AUTOR->getBooks())<=0){ ?>
-	                				<a id="btn_delete" class="btn btn-sm btn-warning pull-right" onclick="deleteAuthor()" >Borrar</a>
+	                				<a id="btn_delete" class="btn btn-sm btn-warning pull-right" data-loading-text="Borrando..." onclick="deleteAuthor()" >Borrar</a>
 	                			<?php } ?>
                 			</div>
                 		</div>
@@ -135,7 +135,25 @@
 		                					
 		                					/** Borra el autor */
 		                					function deleteAuthor(){
-		                						alert("AJAX:\ntype=author\naction=REMOVE\nAvisar errores");
+		                						$('#btn_delete').button('loading');
+		                						$.ajax({
+		                							url:"ajax.php",
+		                							type:"POST",
+		                							data:{
+		                								type:"author",
+		                								action:"REMOVE",
+		                								auth_id:"<?php echo $AUTOR->getID(); ?>"
+		                							},
+		                							success:function(data){
+		                								if (data=="true"){
+		                									alert("El autor fue eliminado correctamente");
+		                									window.location.href = "admin_authors.php";
+		                								}else{
+		                									alert("Error al eliminar al autor\nIntente nuevamente");
+		                								}
+		                								$('#btn_delete').button('reset');
+		                							}
+		                						});
 		                					}
 	                					<?php } ?>
 	                					<?php if ($NUEVO_AUTOR){ ?>

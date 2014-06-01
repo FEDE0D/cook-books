@@ -400,6 +400,8 @@ class Book{
 			$texto,
 			$tapa;
 			
+	private $author;
+			
 	function __construct($param){
 		$this->ISBN = $param['ISBN'];
 		$this->titulo = $param['titulo'];
@@ -411,6 +413,7 @@ class Book{
 		$this->etiquetas = $param['etiquetas'];
 		$this->texto = $param['texto'];
 		$this->tapa = $param['tapa'];
+		$this->author = NULL;
 	}
 	
 	/**Solo DEBUG*/
@@ -441,7 +444,8 @@ class Book{
 	
 	/** Retorna un objeto Author */
 	function getAutor(){
-		return Authors::getAuthor($this->getAutor_ID());
+		if ($this->author) return $this->author;
+		else return Authors::getAuthor($this->getAutor_ID());
 	}
 	
 	function getPaginas(){
@@ -604,11 +608,11 @@ class Author{
 			
 	function __construct($params){
 		$this->ID = $params['ID'];
-		$this->nombre = $params['nombre'];
-		$this->apellido = $params['apellido'];
-		$this->fecha_nacimiento = $params['fecha_nacimiento'];
-		$this->lugar_nacimiento = $params['lugar_nacimiento'];
-		$this->eliminado = $params['eliminado'];
+		$this->nombre = $params['nombre']? $params['nombre']: "";
+		$this->apellido = $params['apellido']? $params['apellido']:"";
+		$this->fecha_nacimiento = $params['fecha_nacimiento']? $params['fecha_nacimiento']:"0000-00-00";
+		$this->lugar_nacimiento = $params['lugar_nacimiento']? $params['lugar_nacimiento']:"";
+		$this->eliminado = $params['eliminado']? $params['eliminado']:0;
 	}
 	
 	/** Guarda este autor en la base de datos (sobreescribiendo los datos viejos). Retorna true si la modificación tuvo éxito, false caso contrario. */
