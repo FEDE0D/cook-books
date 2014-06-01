@@ -2,8 +2,6 @@
 	
 	include_once('database.php');
 	
-	$USERS = new Users;
-	$CART = new Cart;
 ?>
 <div id ="navigationWrapper">
 	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -38,18 +36,18 @@
 				
 				<ul class="nav navbar-nav navbar-right">
 					<?php 
-					if ($user = $USERS->getUserLogin()){
+					if ($user = Users::getUserLogin()){
 					?>
 				            <?php
 				            if (!$user->getIsAdministrator()){
 				            ?>
 					            <li class="dropdown">
 					                <a id="cartButton" href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" rel="tooltip" data-placement="bottom" title="Ver carrito" data-loading-text="Espere...">
-					                    <span class="badge" id="cartSize"><?php echo $CART->sizeCart() ?></span> <span class="glyphicon glyphicon-shopping-cart"></span>
+					                    <span class="badge" id="cartSize"><?php echo Cart::sizeCart() ?></span> <span class="glyphicon glyphicon-shopping-cart"></span>
 					                </a>
-					                <?php if ($CART->sizeCart()>0){ ?>
+					                <?php if (Cart::sizeCart()>0){ ?>
 					                <ul id="cartMenu" class="dropdown-menu dropdown-menu-right" role="menu">
-					                	<?php $CART->printCartHTML(); ?>
+					                	<?php Cart::printCartHTML(); ?>
 					                </ul>
 					                <?php } ?>
 					            </li>

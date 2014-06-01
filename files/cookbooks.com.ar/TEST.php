@@ -3,7 +3,8 @@
 	<header>
 		<title>Test page</title>
 		<meta content="text/html" charset="UTF-8" />
-		<script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+		<link rel="shortcut icon" href="website/favicon/1.png"/>
+		<script src="website/jquery-1.11.0.js"></script>
 	</header>
 	<body>
 		<?php

@@ -5,7 +5,7 @@
  */
 class Conexion {
 	
-	private $local = true;//Indica si estoy trabajando con un servidor local.
+	private $local = TRUE;//Indica si estoy trabajando con un servidor local.
 	private $hostname = 'localhost';
 	private $port = '8080';
 	private $username = 'root';
@@ -127,33 +127,40 @@ class Conexion {
 
 class Users{
 	
-	private $conexion;
+	static private $conexion;
+	static private $initialized = FALSE;
 	
-	/** Constructor */
-	function __construct(){
-		$this->conexion = new Conexion;
-		if (!$this->conexion->conectar()) Errors::error("No se pudo conectar a la base de datos", "Error al conectarse a la base de datos. Intente nuevamente.");
+	function __construct(){}
+	
+	static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar()) Errors::error("No se pudo conectar a la base de datos", "Error al conectarse a la base de datos. Intente nuevamente.");
+		self::$initialized = TRUE;
 	}
 	
 	/** Retorna la tabla de los usuarios completa */
-	function tableUsers(){
-		return $this->conexion->queryToTable("SELECT * FROM usuarios");
+	static function tableUsers(){
+		self::initialize();
+		return self::$conexion->queryToTable("SELECT * FROM usuarios");
 	}
 	
 	/** Retorna la tabla de los usuarios ordenada por fecha de ingreso */
-	function tableUsersBySignUpDate(){
-		return $this->conexion->queryToTable("SELECT * FROM usuarios ORDER BY fecha_alta");
+	static function tableUsersBySignUpDate(){
+		self::initialize();
+		return self::$conexion->queryToTable("SELECT * FROM usuarios ORDER BY fecha_alta");
 	}
 	
 	/** Checkea si existe un usuario con estas credenciales en la base de datos */
-	function userExists($username){
-		return $this->conexion->queryExist("SELECT * FROM usuarios WHERE username='$username' ");
+	static function userExists($username){
+		self::initialize();
+		return self::$conexion->queryExist("SELECT * FROM usuarios WHERE username='$username' ");
 	}
 	
 	/** Checkea si existe un usuario con estas credenciales en la base de datos. Retorna un objeto Usuario */
-	function userExists2($username, $password){
-		//return $this->conexion->queryExist("SELECT * FROM usuarios WHERE username='$username' AND password='$password' ");
-		$info = $this->conexion->query("SELECT * FROM usuarios WHERE username='$username' AND password='$password'");
+	static function userExists2($username, $password){
+		self::initialize();
+		$info = self::$conexion->query("SELECT * FROM usuarios WHERE username='$username' AND password='$password'");
 		if ($info->rowCount() == 1){
 			$array = $info->fetch(PDO::FETCH_ASSOC);
 			return new User($array);
@@ -161,14 +168,16 @@ class Users{
 	}
 	
 	/** Retorna TRUE si el email existe en la base de datos, FALSE en caso contrario*/
-	function emailExists($email){
-		return $this->conexion->queryExist("SELECT * FROM usuarios WHERE mail='$email' ");
+	static function emailExists($email){
+		self::initialize();
+		return self::$conexion->queryExist("SELECT * FROM usuarios WHERE mail='$email' ");
 	}
 	
 	/** Agrega un nuevo usuario a la base de datos. 
 	 * Devuelve un objeto User o NULL si no pudo agregarlo 
 	 * Notar que esta funcion solo crea usuarios, NO crea admins*/
-	function userCreate($username, $password, $email){
+	static function userCreate($username, $password, $email){
+		self::initialize();
 		$today = date("Y-m-d");
 		$query = "
 			INSERT INTO  `usuarios` (
@@ -187,19 +196,20 @@ class Users{
 			'$username',  '$password',  '', '' , '' ,  '$email', '' ,  '0',  '$today', ''
 			);
 		";
-		$result = $this->conexion->insert($query);
+		$result = self::$conexion->insert($query);
 		if ($result->rowCount()==1){
-			//TODO: retornar nuevo usuario sacando info de $result en lugar de pedir nuevos datos
-			return $this->userExists2($username, $password);
+			//TODO: retornar nuevo usuario sacando info de $result en lugar de pedir nuevos datos?
+			return self::userExists2($username, $password);
 		}else return NULL;
 	}
 	
 	/**Retorna un objeto Usuario si existe un usuario logueado, NULL en caso contrario*/
-	function getUserLogin(){
+	static function getUserLogin(){
+		self::initialize();
 		if (session_status() == PHP_SESSION_NONE) session_start();
 		if (isset($_SESSION['username'])){
 			$username = $_SESSION['username'];
-			$info = $this->conexion->query("SELECT * FROM usuarios WHERE username='$username' ");
+			$info = self::$conexion->query("SELECT * FROM usuarios WHERE username='$username' ");
 			if ($info->rowCount() == 1){
 				$array = $info->fetch(PDO::FETCH_ASSOC);
 				return new User($array);
@@ -210,13 +220,15 @@ class Users{
 	}
 	
 	/** Guarda la información de la sesión del usuario*/
-	function saveLogin(User $user){
+	static function saveLogin(User $user){
+		self::initialize();
 		if (session_status() == PHP_SESSION_NONE) session_start();
         $_SESSION['username'] = $user->getUsername();
 	}
 	
 	/** Elimina la información de la sesión del usuario */
-	function removeLogin(){
+	static function removeLogin(){
+		self::initialize();
 		if (session_status() == PHP_SESSION_NONE) session_start();
 		session_destroy();
 	}
@@ -682,27 +694,32 @@ class Author{
 
 class Cart{
 	
-	private $articulos; //variable de sesión donde se guarda la información del carrito
+	static private $articulos; //variable de sesión donde se guarda la información del carrito
+	static private $initialized = FALSE;
 	
-	function __construct(){
+	function __construct(){}
+	
+	static function initialize(){
+		if (self::$initialized) return;
 		if (session_status() == PHP_SESSION_NONE) session_start();
 		
 		if (!isset($_SESSION['articulos']))	$_SESSION['articulos'] = Array();
-		$this->articulos = $_SESSION['articulos'];
+		self::$articulos = $_SESSION['articulos'];
+		self::$initialized = TRUE;
 	}
 	
 	/** Agrega un libro al carrito. Si ya está en el carrito aumenta su cantidad */
-	function addToCart($bookId){
-		if (array_key_exists($bookId, $this->articulos)){
-			$this->articulos[$bookId]['cantidad']++;
+	static function addToCart($bookId){
+		self::initialize();
+		if (array_key_exists($bookId, self::$articulos)){
+			self::$articulos[$bookId]['cantidad']++;
 		}else{
-			$this->articulos[$bookId] = array();
-			$this->articulos[$bookId]['cantidad'] = 1;
+			self::$articulos[$bookId] = array();
+			self::$articulos[$bookId]['cantidad'] = 1;
 			
 			//por motivos de optimización además guardo datos sobre el libro
 			include_once 'database.php';
-			$BOOKS = new Books;
-			$book = $BOOKS->getBook($bookId);
+			$book = Books::getBook($bookId);
 			
 			$arrayBook = array(
 				"ISBN" => $book->getISBN(),
@@ -717,55 +734,59 @@ class Cart{
 				"tapa" => $book->getTapa()
 			);
 			
-			$this->articulos[$bookId] = array_merge($this->articulos[$bookId], $arrayBook);
+			self::$articulos[$bookId] = array_merge(self::$articulos[$bookId], $arrayBook);
 		}
 	}
 	
 	/** Elimina un libro del carrito */
-	function removeFromCart($bookId){
-		if (array_key_exists($bookId, $this->articulos)){
-			if ($this->articulos[$bookId]['cantidad']>1) $this->articulos[$bookId]['cantidad']--;
-			else unset($this->articulos[$bookId]);
+	static function removeFromCart($bookId){
+		self::initialize();
+		if (array_key_exists($bookId, self::$articulos)){
+			if (self::$articulos[$bookId]['cantidad']>1) self::$articulos[$bookId]['cantidad']--;
+			else unset(self::$articulos[$bookId]);
 		}
 	}
 	
 	/** Vacía el carrito */
-	function emptyCart(){
-		$this->articulos = Array();
+	static function emptyCart(){
+		self::initialize();
+		self::$articulos = Array();
 	}
 	
 	/** Guarda la información del carrito en la sesion */
-	function saveCart(){
-		$_SESSION['articulos'] = $this->articulos;
+	static function saveCart(){
+		self::initialize();
+		$_SESSION['articulos'] = self::$articulos;
 	}
 	
 	/** Retorna la cantidad de libros en el carrito */
-	function sizeCart(){
-		//return array_sum($this->articulos);
+	static function sizeCart(){
+		self::initialize();
 		$sum = 0;
-		foreach ($this->articulos as $bookid => $book) {
+		foreach (self::$articulos as $bookid => $book) {
 			$cantidad = $book['cantidad'];
 			$sum += $cantidad;
 		}
-		
 		return $sum;
 	}
 	
 	/** Retorna el precio total del carrito */
-	function priceCart(){
+	static function priceCart(){
+		self::initialize();
 		$sum = 0;
-		foreach ($this->articulos as $bookid => $book) {
+		foreach (self::$articulos as $bookid => $book) {
 			$sum += $book['precio']*$book['cantidad'];
 		}
 		return $sum;
 	}
 	
 	/** Crea la vista para el dropmenu del carrito*/
-	function printCartHTML(){
+	static function printCartHTML(){
+		self::initialize();
 		?>
 		<div class="" style="width: 500px; padding: 10px">
 		<?php
-		foreach ($this->articulos as $bookid => $book) {
+		foreach (self::$articulos as $bookid => $book) {
 			$cantidad = $book['cantidad'];
 			?>
 			<li >
@@ -799,7 +820,7 @@ class Cart{
         	<?php
 		}
 		?>
-			<p>Total: $<?php echo $this->priceCart() ?>
+			<p>Total: $<?php echo self::priceCart() ?>
 			<button onclick="
             	<?php
             		echo (
@@ -829,8 +850,9 @@ class Cart{
 	}
 	
 	/** Imprime el carrito. Solo para debug. */
-	function printCart(){
-		print_r($this->articulos);
+	static function printCart(){
+		self::initialize();
+		print_r(self::$articulos);
 	}
 	
 }

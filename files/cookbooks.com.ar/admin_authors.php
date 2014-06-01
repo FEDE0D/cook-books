@@ -1,8 +1,7 @@
 <?php include_once('database.php'); ?>
 <?php
 	//SOLO UN ADMINISTRADOR PUEDE VER ESTA PAGINA
-	$Users = new Users;
-	$user = $Users->getUserLogin();
+	$user = Users::getUserLogin();
 	if (!$user || !$user->getIsAdministrator()){
 		Errors::error("Sin privilegios", "No tienes privilegios para ver esta pagina!");
 	}
@@ -13,8 +12,9 @@
         <title>Cook-Book</title>
         <meta content="text/html"; charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="website/favicon/1.png"/>
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
-        <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+		<script src="website/jquery-1.11.0.js"></script>
         <?php include_once('database.php'); ?>
     </head>
     <body>
@@ -49,9 +49,7 @@
 										<!-- <a href="admin_authors.php?id=xxx" class="list-group-item active?">Nombre Apellido</a> -->
 										<a id="auth_<?php echo $value->getID(); ?>" href="admin_authors.php?id=<?php echo $value->getID(); ?>" class="list-group-item <?php if ($ID_ACTIVE==$value->getID()) echo 'active' ?>">
 											<?php echo $value->getApellido().', '.$value->getNombre(); ?>
-											<span class="badge" title="Cantidad de libros">
-												<?php echo count($books); ?>
-											</span>
+											<span class="badge" title="Cantidad de libros"><?php echo count($books); ?></span>
 										</a>
 										<?php
 									}
@@ -204,10 +202,14 @@
         <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
         <script>
     	<?php if ($NUEVO_AUTOR){?>
-    		
     		//Poner en foco el campo de nombre, solo cuando esta en modo NUEVO AUTOR
         	$('#auth_name').focus();
         <?php } ?>
         </script>
+        <style type="text/css">
+        	body{
+        		background-image: url('website/img/556058.png');
+        	}
+        </style>
     </body>
 </html>

@@ -1,9 +1,8 @@
 <?php 
 	include_once('database.php');
-	$USERS = new Users;
 	
 	
-	$login = $USERS->getUserLogin();
+	$login = Users::getUserLogin();
 	if ($login) header("location: ./");
 	
 ?>
@@ -13,8 +12,9 @@
         <title>Cook-Book</title>
         <meta content="text/html"; charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="website/favicon/1.png"/>
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
-        <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+        <script src="website/jquery-1.11.0.js"></script>
         <?php include_once('database.php'); ?>
     </head>
     <body>

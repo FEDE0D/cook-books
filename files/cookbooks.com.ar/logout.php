@@ -1,8 +1,7 @@
 <?php
     include_once('database.php');
-	$USERS = new Users;
 	
-	$USERS->removeLogin();
+	Users::removeLogin();
 	
 	header( 'Location: ./' ) ;
 ?>

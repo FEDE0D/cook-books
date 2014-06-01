@@ -7,9 +7,8 @@
 			
 
     include_once("database.php");
-	$USERS = new Users;
 	
-    if ($USERS->getUserLogin()){
+    if (Users::getUserLogin()){
     	//ERROR, ya está logueado
     	header( 'Location: ./' ) ;
     }
@@ -19,12 +18,12 @@
 		$password1 = $_POST['password1'];
 		$password2 = $_POST['password2'];
 		
-		if (!$USERS->userExists($username)){
-			if (!$USERS->emailExists($email)){
+		if (!Users::userExists($username)){
+			if (!Users::emailExists($email)){
 				if ($password1==$password2){
-					if ($newUser = $USERS->userCreate($username, $password1, $email)){
+					if ($newUser = Users::userCreate($username, $password1, $email)){
 						//SUCCESS, usuario creado exitosamente, login usuario
-						$USERS->saveLogin($newUser);
+						Users::saveLogin($newUser);
 						header( 'Location: ./' ) ;
 					}else{
 						echo "<p>Error: al crear el usuario.</p>";

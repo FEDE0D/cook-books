@@ -4,8 +4,9 @@
     <title>Cook-Book</title>
     <meta content="text/html"; charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="website/favicon/1.png"/>
     <!--JQUERY-->
-    <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+    <script src="website/jquery-1.11.0.js"></script>
     <!--BOOTSTRAP-->
     <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
     <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
@@ -132,5 +133,10 @@
 			}
 		);
 	</script>
+	<style type="text/css">
+    	body{
+    		background-image: url('website/img/food.png');
+    	}
+    </style>
   </body>
 </html>

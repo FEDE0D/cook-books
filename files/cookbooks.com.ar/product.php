@@ -1,11 +1,18 @@
+<!-- TODO:
+Botón modificar libro, solo para administradores
+Botón carrito, solo para usuarios registrados
+Botón buscar más del mismo autor
+Mejorar GUI, más user-friendly
+-->
 <!DOCTYPE html>
 <html lang="es">
     <head>
         <title>Cook-Book</title>
         <meta content="text/html"; charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="website/favicon/1.png"/>
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
-        <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+        <script src="website/jquery-1.11.0.js"></script>
         <?php include_once('database.php'); ?>
     </head>
     <body>
@@ -13,8 +20,7 @@
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-2">
-                		<a id="btn_booksby" class="btn btn-sm btn-info pull-left" onclick="index.php" >Volver atrás</a>
-                	
+                	<a id="btn_booksby" class="btn btn-sm btn-info pull-left" onclick="index.php" >Volver atrás</a>
                 </div>
                 <div class="col-md-8">
 
@@ -48,15 +54,20 @@
 												<strong>Precio</strong>: <?php echo $book->getPrecio() ?></br>
 												<strong>Fecha</strong>: <?php echo $book->getFecha() ?></br>
 												<strong>Etiquetas</strong>: <?php echo $book->getEtiquetas() ?></br>
-												<strong>Descripcion</strong>: <?php echo $book->getTexto() ?></br>
-												
+												<?php
+													$filepath = "books/text/".$book->getTexto();
+													if (file_exists($filepath)){
+														?>
+														<strong>Descripcion</strong>: <?php echo file_get_contents($filepath);?></br>
+														<?php
+													} 
+												?>
 												</h3>
 											
 											</div>
 									
 											<?php
-											$USERS = new Users;
-											if ($user = $USERS->getUserLogin()){
+											if ($user = Users::getUserLogin()){
 												if (!$user->getIsAdministrator()){
 												?>
 													<button 

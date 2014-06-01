@@ -4,8 +4,9 @@
         <title>Cook-Book</title>
         <meta content="text/html"; charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="website/favicon/1.png"/>
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
-        <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
+        <script src="website/jquery-1.11.0.js"></script>
         <?php include_once('database.php'); ?>
     </head>
     <body>
@@ -13,7 +14,6 @@
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-2">
-                	
                 </div>
                 
                 <div class="col-md-8">
@@ -26,9 +26,7 @@
 
                         <div class="panel panel-default">
                             <?php
-                            	$USERS = new Users;
-                            	$BOOKS = new Books;
-                            	$books = $BOOKS -> getBestSellers(5);
+                            	$books = Books::getBestSellers(5);
 							?>
 								
 							<table class='table table-bordered'>
@@ -52,7 +50,7 @@
 										</td>
 										<td>$ <?php echo $book->getPrecio() ?><br>
 											<?php
-											if ($user = $USERS->getUserLogin()){
+											if ($user = Users::getUserLogin()){
 												if (!$user->getIsAdministrator()){
 												?>
 													<button 
