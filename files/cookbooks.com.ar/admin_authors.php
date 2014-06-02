@@ -191,7 +191,9 @@
                 		</div>
                 		<div class="panel-footer">
                 			<div class="container-fluid">
+	                			<?php if ($AUTOR){ ?>
 	                			<a id="btn_booksby" class="btn btn-sm btn-info pull-right" onclick="seeAuthorsBooks()" >Ver libros</a>
+	                			<?php } ?>
 	            				<a id="btn_save" class="btn btn-sm btn-default" onclick="saveAuthor()" data-loading-text="Guardando...">Guardar</a>
             				</div>
                 		</div>
