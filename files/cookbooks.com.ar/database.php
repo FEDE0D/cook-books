@@ -197,9 +197,11 @@ class Users{
 			);
 		";
 		$result = self::$conexion->insert($query);
-		if ($result->rowCount()==1){
-			//TODO: retornar nuevo usuario sacando info de $result en lugar de pedir nuevos datos?
-			return self::userExists2($username, $password);
+		if ($result){
+			if ($result->rowCount()==1){
+				//TODO: retornar nuevo usuario sacando info de $result en lugar de pedir nuevos datos?
+				return self::userExists2($username, $password);
+			}else return NULL;
 		}else return NULL;
 	}
 	
