@@ -93,6 +93,46 @@
 					}
 				}
 			}
+		}else if ($_REQUEST['type']=='libro'){//	Libro
+			$isbn = isset($_REQUEST['libro_ISBN'])? $_REQUEST['libro_ISBN']:'';
+			$titulo = isset($_REQUEST['libro_titulo'])? $_REQUEST['libro_titulo']:'';
+			$idioma = isset($_REQUEST['libro_idioma'])? $_REQUEST['libro_idioma']:'';
+			$precio = isset($_REQUEST['libro_precio'])? $_REQUEST['libro_precio']:'';
+			$texto = isset($_REQUEST['libro_texto'])? $_REQUEST['libro_texto']:'';
+			$tags = isset($_REQUEST['libro_tags'])? $_REQUEST['libro_tags']:'';
+			$fecha = isset($_REQUEST['libro_fecha'])? $_REQUEST['libro_fecha']:'';
+			$autores = isset($_REQUEST['libro_autor'])? $_REQUEST['libro_autor']:'';
+			$paginas = isset($_REQUEST['libro_pag'])? $_REQUEST['libro_pag']:'';
+			$tapa = isset($_REQUEST['libro_tapa'])? $_REQUEST['libro_tapa']:'';
+		
+			
+			if (isset($_REQUEST['action'])){
+				if ($_REQUEST['action']=='NEW'){//	agregar nuevo libro
+				
+					$libro = Books::newBooks($isbn, $titulo, $idioma, $fecha, $tags, $precio, $texto, $autor, $paginas, $tapa);	
+					
+					echo $libro? $libro->getISBN():'false';
+				}else if ($_REQUEST['action']=='UPDATE'){//	actualizar libro
+					$libro = Books::getBook($isbn);
+					if ($libro){
+					
+						$libro->setTitulo($titulo);
+						$libro->setAutor($autor);
+						$libro->setEtiquetas($tags);
+						$libro->setIdioma($idioma);
+						$libro->setPrecio($precio);
+						$libro->setPaginas($paginas);
+						$libro->setTapa($tapa);
+						$libro->setTexto($texto);
+						$libro->setFecha($fecha);
+						echo $libro->save()? 'true':'false';
+					}else{
+						echo 'false';
+					}
+				}else if ($_REQUEST['action']=='REMOVE'){// eliminar libro
+					
+				}
+			}
 			
 		}
 	}

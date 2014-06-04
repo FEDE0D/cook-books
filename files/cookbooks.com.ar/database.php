@@ -10,7 +10,7 @@ class Conexion {
 	private $port = '8080';
 	private $username = 'root';
 	private $password = 'F3Dericcio';
-	private $dbname = 'CookBooks';
+	private $dbname = 'cookbookg32';
 	
 	private $dbh;
 	
@@ -64,6 +64,7 @@ class Conexion {
 	
 	/** Convierte una consulta SELECT a una tabla */
 	function resultToTable($queryResult, $tableHTMLAttributes = ""){
+		if (!$queryResult) return "";
 		$string = "";
 		$result = $queryResult->fetchAll(PDO::FETCH_NAMED);
 				
@@ -332,11 +333,38 @@ class Books{
 		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
 		self::$initialized = TRUE;
 	}
+	/** Retorna un array de objetos Book con todos los libros no eliminados en el sistema */
+	static function getLibros(){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			FROM libros L
+			LEFT JOIN escribe A ON (L.ISBN=A.isbn)
+			WHERE(L.eliminado=0)
+			GROUP BY L.ISBN
+		");
+				
+		$libros = array();
+		if ($result){
+			$librosDatos = $result->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($librosDatos as $key => $info) {
+				array_push($libros, new Book($info));
+			}
+		}
+		return $libros;
+		
+	}
 	
-	/**Devuelve un objeto Book o NULL si no existe*/
+	/**Devuelve un objeto Book o NULL si no existe. El libro puede estar eliminado */
 	static function getBook($bookISBN){
 		self::initialize();
-		$result = self::$conexion->query("SELECT * FROM libros WHERE ISBN='$bookISBN' ");
+		$result = self::$conexion->query("
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			FROM libros L
+			LEFT JOIN escribe A ON (L.ISBN=A.isbn)
+			GROUP BY L.ISBN
+			HAVING (L.ISBN=$bookISBN)
+		");
 		if ($result){
 			$bookInfo = $result->fetchAll(PDO::FETCH_ASSOC);
 			return new Book($bookInfo[0]);
@@ -348,16 +376,18 @@ class Books{
 	static function getBestSellers($cantidad){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, L.AUTOR, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM libros L
-			LEFT JOIN autor A ON (L.AUTOR=A.ID)
-			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
+			LEFT JOIN escribe A ON (L.ISBN=A.isbn)
+			WHERE (L.eliminado=0)
+			Group by L.ISBN
 			LIMIT $cantidad
 		");
 		$resultado = Array();
 		if ($result){
 			$books = $result->fetchAll(PDO::FETCH_ASSOC);
 			foreach ($books as $num => $bookInfo) {
+				
 				array_push($resultado, new Book($bookInfo));
 			}
 		}
@@ -365,27 +395,31 @@ class Books{
 	}
 	
 	/** Devuelve la tabla de libros lista para mostrar en la pagina del catalogo (books.php)
-		NOTAR: Concatenación de campos y cambio de nombre de columnas! */
+	 *	FIXME: Devolver nombre de autores concatenados
+	 *	TODO: Crear clase Catálogo y armar Tabla Jquery con eso.
+	 */
 	static function getCatalogo(){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, concat(A.nombre,' ',A.apellido) as autor, L.paginas, L.precio, I.nombre as idioma, L.fecha, L.etiquetas
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.id_autor) as autor, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas
 			FROM libros L
-			LEFT JOIN autor A ON (L.AUTOR=A.ID)
-			LEFT JOIN idioma I ON (L.IDIOMA=I.ID)
-			ORDER BY ISBN
+			LEFT JOIN escribe A ON (L.ISBN=A.isbn)
+			WHERE (L.eliminado=0)
+			Group by L.ISBN
 		");
 		return self::$conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
 	}
 	
-	/** Retorna un array con objetos Book de ese autor */
+	/** Retorna un array con objetos Book de ese autor. Notar que este metodo no diferencia entre libros eliminados y no eliminados */
 	static function getBooksBy($author_id){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, L.AUTOR, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM autor A
-			INNER JOIN libros L ON (A.ID=L.AUTOR)
-			WHERE (A.ID=$author_id)
+			LEFT JOIN escribe E ON (A.ID=E.id_autor)
+			INNER JOIN libros L ON (E.isbn=L.ISBN)
+			GROUP BY (E.isbn)
+			HAVING autores LIKE '%$author_id%'
 		");
 		$books = Array();
 		if ($result){
@@ -399,49 +433,150 @@ class Books{
 		return $books;
 	}
 	
+	/** Crea un nuevo libro. $autores es un string con IDs de autores separados por comas. */
+	public static function newBook($ISBN, $titulo, $idioma, $fecha, $tags, $precio, $texto, $autores, $paginas, $tapa){
+		self::initialize();
+		
+		$autores = explode(",", $autores);
+		$query = "
+			INSERT INTO `escribe`(`id`, `isbn`, `id_autor`)
+			VALUES 
+		";
+		foreach ($autores as $key => $value) {
+			$query .= "(NULL, $ISBN, $value),";
+		}
+		$queryEscribe = substr($query,0,-1);
+		
+		//Inserto los datos del nuevo libro
+		$result = self::$conexion->query("
+			INSERT 
+			INTO libros (
+				`ISBN`,
+				`titulo`,
+				`IDIOMA`,
+				`paginas`,
+				`precio`,
+				`fecha`,
+				`etiquetas`,
+				`texto`,
+				`tapa`,
+				`eliminado`
+				)
+			VALUES(
+				'$ISBN',
+				'$titulo',
+				'$idioma',
+				'$paginas',
+				'$precio',
+				'$fecha',
+				'$tags',
+				'$texto',
+				'$tapa',
+				'0'
+			)
+		");
+		
+		
+		if ($result){
+			//Inserto los datos de los autores
+			$result2 = self::$conexion->query($queryEscribe);
+			if ($result2){
+				$id = self::$conexion->getLastInsertedID();
+				return Books::getBook($ISBN);
+			}else{
+				// FIXME: Pueden darse de alta libros y no llegar a actualizarse los autores!
+				return NULL;
+			}
+		}else{
+			// print_r(self::$conexion->getLastError());
+			return NULL;
+		}
+	}
+	public static function updateBook(Book $libro){
+		self::initialize();
+		
+		$isbn = $libro->getISBN();
+		$titulo = $libro->getTitulo();
+		$idioma = $libro->getIdioma_ID();
+		$fecha = $libro->getFecha();
+		$tags = $libro->getEtiquetas();
+		$precio = $libro->getPrecio();
+		$texto = $libro->getTexto();
+		$autores = $libro->getAutoresIDs();
+		$paginas = $libro->getPaginas();
+		$tapa = $libro->getTapa();
+		$eliminado = $libro->getEliminado();
+	
+		$result = self::$conexion->query("
+			UPDATE  libros
+			SET titulo = '$titulo',
+			IDIOMA = '$idioma',
+			paginas = '$paginas',
+			precio = '$precio',
+			fecha = '$fecha'
+			etiquetas = '$tags',
+			texto = '$texto',
+			tapa = '$tapa'
+			eliminado = '$eliminado'
+			WHERE (ISBN = $isbn)
+		");
+		if ($result){
+			//	Baja de las conexiones de autores de este libro en tabla Escritos
+			$result2 = self::$conexion->query("
+				DELETE FROM escribe
+				WHERE (isbn=$isbn)
+			");
+			if ($result2){
+				//	Dar de alta las conexiones de autores de este libro en tabla Escritos
+				$autores = explode(",", $autores);
+				$query = "
+					INSERT INTO escribe(`id`, `isbn`, `id_autor`)
+					VALUES 
+				";
+				foreach ($autores as $key => $value) {
+					$query .= "(NULL, $isbn, $value),";
+				}
+				$queryEscribe = substr($query,0,-1);
+				$result3 = self::$conexion->query($queryEscribe);
+				if ($result3){
+					return TRUE;
+				}
+			}
+			return TRUE;
+		}
+		return FALSE;
+	}
+	
+	
+	
 }
 
 class Book{
 	
 	private	$ISBN,
 			$titulo,
-			$autor_ID,
 			$paginas,
 			$precio,
-			$idioma_ID,
+			$idioma,
 			$fecha,
 			$etiquetas,
 			$texto,
-			$tapa;
-			
-	private $author;
+			$tapa,
+			$eliminado,
+			$autores; //es un string de id de autor separados por comas
 			
 	function __construct($param){
 		$this->ISBN = $param['ISBN'];
-		$this->titulo = $param['titulo'];
-		$this->autor_ID = $param['AUTOR'];
-		$this->paginas = $param['paginas'];
-		$this->precio = $param['precio'];
-		$this->idioma_ID = $param['IDIOMA'];
-		$this->fecha = $param['fecha'];
-		$this->etiquetas = $param['etiquetas'];
-		$this->texto = $param['texto'];
-		$this->tapa = $param['tapa'];
-		$this->author = NULL;
-	}
-	
-	/**Solo DEBUG*/
-	function printBook(){
-		echo $this->ISBN."<br>";
-		echo $this->titulo."<br>";
-		echo $this->autor_ID."<br>";
-		echo $this->paginas."<br>";
-		echo $this->precio."<br>";
-		echo $this->idioma_ID."<br>";
-		echo $this->fecha."<br>";
-		echo $this->etiquetas."<br>";
-		echo $this->texto."<br>";
-		echo $this->tapa."<br>";
+		$this->titulo = $param['titulo']? $param['titulo']:'';
+		$this->paginas = $param['paginas']? $param['paginas']:'0';
+		$this->precio = $param['precio']? $param['precio']:'0';
+		$this->idioma= $param['IDIOMA']? $param['IDIOMA']:'';
+		$this->fecha = $param['fecha']? $param['fecha']:'0000-00-00';
+		$this->etiquetas = $param['etiquetas']? $param['etiquetas']:'';
+		$this->texto = $param['texto']? $param['texto']:'';
+		$this->tapa = $param['tapa']? $param['tapa']:'';
+		$this->eliminado = $param['eliminado']? $param['eliminado']:'0';
+		$this->autores = $param['autores']? $param['autores']:'';
 	}
 	
 	function getISBN(){
@@ -452,14 +587,26 @@ class Book{
 		return $this->titulo;
 	}
 	
-	function getAutor_ID(){
-		return $this->autor_ID;
+	/** Retorna la lista de IDs de autores, separadas por coma */
+	function getAutoresIDs(){
+		return $this->autores;
 	}
 	
-	/** Retorna un objeto Author */
-	function getAutor(){
-		if ($this->author) return $this->author;
-		else return Authors::getAuthor($this->getAutor_ID());
+	/** Retorna la lista de IDs de autores en un array */
+	function getAutoresIDs_arr(){
+		return explode(",", $this->autores);
+	}
+	
+	/** Retorna un arreglo de objetos Author */
+	function getAutores(){
+		$autores_ids = $this->autores;
+		$autores_ids = explode(",", $this->autores);
+		$result= Array();
+		foreach ($autores_ids as $key => $value) {
+			$autor = Authors::getAuthor($value);
+			if ($autor)	array_push($result, $autor);
+		}
+		return $result;
 	}
 	
 	function getPaginas(){
@@ -470,13 +617,8 @@ class Book{
 		return $this->precio;
 	}
 	
-	function getIdioma_ID(){
-		return $this->idioma_ID;
-	}
-	
-	/** Retorna un objeto idioma */
 	function getIdioma(){
-		return Idiomas::getIdioma($this->getIdioma_ID());
+		return $this->idioma;
 	}
 	
 	function getFecha(){
@@ -493,6 +635,49 @@ class Book{
 	
 	function getTapa(){
 		return $this->tapa;
+	}
+	
+	function getEliminado(){
+		return $this->eliminado;
+	}
+	
+	function setTitulo($titulo){
+		$this->titulo=$titulo;
+	}
+	
+	function setPaginas($paginas){
+		$this->paginas=$paginas;
+	}
+	
+	function setPrecio($precio){
+		$this->precio=$precio;
+	}
+	
+	function setIdioma($idioma){
+		$this->idioma_ID=$idioma;
+	}
+	function setFecha($fecha){
+		$this->fecha=$fecha;
+	}
+	
+	function setEtiquetas($etiquetas){
+		$this->etiquetas=$etiquetas;
+	}
+	
+	function setTexto($texto){
+		$this->texto=$texto;
+	}
+	
+	function setTapa($tapa){
+		$this->tapa=$tapa;
+	}
+	
+	function setEliminado($num){
+		$this->eliminado=$num;
+	}
+	
+	function save(){
+		return Books::updateBook($this);
 	}
 
 	
@@ -722,21 +907,21 @@ class Cart{
 			//por motivos de optimización además guardo datos sobre el libro
 			include_once 'database.php';
 			$book = Books::getBook($bookId);
-			
-			$arrayBook = array(
-				"ISBN" => $book->getISBN(),
-				"titulo" => $book->getTitulo(),
-				"autor" => $book->getAutor(),
-				"paginas" => $book->getPaginas(),
-				"precio" => $book->getPrecio(),
-				"idioma" => $book->getIdioma(),
-				"fecha" => $book->getFecha(),
-				"etiquetas" => $book->getEtiquetas(),
-				"texto" => $book->getTexto(),
-				"tapa" => $book->getTapa()
-			);
-			
-			self::$articulos[$bookId] = array_merge(self::$articulos[$bookId], $arrayBook);
+			if ($book){
+				$arrayBook = array(
+					"ISBN" => $book->getISBN(),
+					"titulo" => $book->getTitulo(),
+					"autores" => $book->getAutoresIDs(),
+					"paginas" => $book->getPaginas(),
+					"precio" => $book->getPrecio(),
+					"idioma" => $book->getIdioma(),
+					"fecha" => $book->getFecha(),
+					"etiquetas" => $book->getEtiquetas(),
+					"texto" => $book->getTexto(),
+					"tapa" => $book->getTapa()
+				);
+				self::$articulos[$bookId] = array_merge(self::$articulos[$bookId], $arrayBook);
+			}
 		}
 	}
 	
@@ -859,58 +1044,7 @@ class Cart{
 	
 }
 
-class Idiomas{
-	
-	static private $conexion;
-	static private $initialized = FALSE;
-	
-	function __construct(){}
-	
-	static function initialize(){
-		if (self::$initialized) return;
-		self::$conexion = new Conexion;
-		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
-		self::$initialized = TRUE;
-	}
-	
-	static function getIdioma($id){
-		self::initialize();
-		$result = self::$conexion->query("
-			SELECT *
-			FROM idioma
-			WHERE (ID=$id)
-			LIMIT 1
-		");
-		if ($result){
-			if ($result->rowCount()>0){
-				return new Idioma($result->fetch(PDO::FETCH_ASSOC));
-			}
-			return NULL;
-		}
-		return NULL;
-	}
-	
-}
 
-class Idioma{
-	
-	private	$ID,
-			$nombre;
-	
-	function __construct($params){
-		$this->ID = $params['ID'];
-		$this->nombre = $params['nombre'];
-	}
-	
-	function getID(){
-		return $this->ID;
-	}
-	
-	function getNombre(){
-		return $this->nombre;
-	}
-	
-}
 
 class Errors{
 	

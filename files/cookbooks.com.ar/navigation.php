@@ -60,7 +60,7 @@
 				                	<?php if ($user->getIsAdministrator()){ ?>
 				                		<li><a href="#"><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Administrar usuarios</a></li>
 				                		<li class="divider"></li>
-				                		<li><a href="#"><span class="glyphicon glyphicon-book"></span>&nbsp;&nbsp;&nbsp;Administrar libros</a></li>
+				                		<li><a href="admin_books.php"><span class="glyphicon glyphicon-book"></span>&nbsp;&nbsp;&nbsp;Administrar libros</a></li>
 				                		<li class="divider"></li>
 				                		<li><a href="admin_authors.php"><span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;&nbsp;Administrar autores</a></li>
 					                    <li class="divider"></li>

@@ -28,8 +28,11 @@
                 			echo "Query = \"".$QUERY."\" <br>";
 							echo "Author ID = \"".$ID_AUTHOR."\" <br>";
 							echo "Language ID = \"".$ID_LANG."\" <br>";
-                		?> 
+                		?>
                 	</h2>
+                	<h3>
+                		Merge con la pagina books.php!
+                	</h3>
                 </div>
                 <div class="col-md-2">
                 	
