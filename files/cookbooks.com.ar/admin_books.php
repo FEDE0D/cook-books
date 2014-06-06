@@ -59,7 +59,7 @@
                 			<div class="container-fluid">
 	                			<a class="btn btn-sm btn-default pull-left" onclick="window.location.href='admin_books.php?new=1'">Nuevo libro</a>
 	                			<?php if($LIBRO){ ?>
-	                				<a id="btn_delete" class="btn btn-sm btn-info pull-right" onclick="deleteLibro()" >Borrar</a>
+	                				<a id="btn_delete" class="btn btn-sm btn-info pull-right" onclick="deleteLibro()" data-loading-text="Borrando...">Borrar</a>
 	                			<?php } ?>
                 			</div>
                 		</div>
@@ -186,19 +186,9 @@
                 					<?php if ($LIBRO){ ?>
 	                					/** Envia los datos del formulario para ser actualizados*/
 	                					function saveLibro(){
-	                					    var isbn = $('#libro_form').find('#libro_ISBN');
+	                						if (!validateBook()) return;
+	                						
                                             var ats = $('#libro_form').find('#libro_autor:checked');
-                                            if (isbn.val()==""){
-                                                alert("El ISBN es obligatorio!");
-                                                return 0;
-                                            }else if(!$.isNumeric(isbn.val())){
-                                                alert("El ISBN es incorrecto!");
-                                                return 0;
-                                            }
-                                            if (ats.length==0){
-                                                alert("Debe seleccionar al menos 1 autor");
-                                                return 0;
-                                            }
 	                						var autores_param="";
 	                						ats.each(
 	                							function(i){
@@ -242,11 +232,10 @@
 	                					
 	                					/** Borra el libro */
 	                					function deleteLibro(){
-	                					    $("#btn_save").button("loading");
-	                					    
 	                					    //confirm
 	                					    if (!confirm("De verdad desea eliminar este libro?")) return;
 	                					    
+	                					    $("#btn_delete").button("loading");
 	                						$.ajax({
 	                						    url:"ajax.php",
 	                						    type:"POST",
@@ -264,7 +253,7 @@
                                                         $('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+data);
                                                         $('#error_alert').removeClass("hidden");
                                                     }
-                                                    $('#btn_save').button('reset');
+                                                    $("#btn_delete").button("reset");
 	                						    }
 	                						});
 	                					}
@@ -272,20 +261,9 @@
                 					<?php if ($NUEVO_LIBRO){ ?>
                 						/** Agrega un nuevo LIBRO a la base de datos */
             							function saveLibro(){
-            							    var isbn = $('#libro_form').find('#libro_ISBN');
+            								if (!validateBook()) return;
+            								
             							    var ats = $('#libro_form').find('#libro_autor:checked');
-            							    if (isbn.val()==""){
-            							        alert("El ISBN es obligatorio!");
-            							        return 0;
-            							    }else if(!$.isNumeric(isbn.val())){
-            							        alert("El ISBN es incorrecto!");
-            							        return 0;
-            							    }
-                                            if (ats.length==0){
-                                                alert("Debe seleccionar al menos 1 autor");
-                                                return 0;
-                                            }
-                                            
                                             var autores_param="";
                                             ats.each(
                                                 function(i){
@@ -309,7 +287,7 @@
 													libro_tags: $('#libro_form').find('#libro_tags').val(),
 													libro_texto: $('#libro_form').find('#libro_texto').val(),
 													libro_autor: autores_param,
-													libro_tapa: $('#libro_form').find('#libro_tapa').val(),
+													libro_tapa: $("#img_tapa").val(),
 													libro_pag: $('#libro_form').find('#libro_pag').val()
 												},
 												success:function(data){
@@ -341,6 +319,51 @@
             </div><!-- fin row -->
         </div><!-- container -->
         <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
+        <script>
+        	/** Valida los campos y retorna true si estan listos para enviarse */
+        	function validateBook(){
+        		var isbn		= $("#libro_form").find("#libro_ISBN");
+        		var titulo		= $("#libro_form").find("#libro_titulo");
+        		var autores		= $("#libro_form").find("#libro_autor:checked");
+        		var fecha		= $("#libro_form").find("#libro_fecha");
+        		var precio		= $("#libro_form").find("#libro_precio");
+        		var idioma		= $("#libro_form").find("#libro_idioma");
+        		var paginas		= $("#libro_form").find("#libro_pag");
+        		var etiquetas	= $("#libro_form").find("#libro_tags");
+        		var descripcion	= $("#libro_form").find("#libro_texto");
+        		var tapa		= $("#img_tapa");
+        		
+        		var error = $("#error_alert");
+        		
+        		if (isbn.val()==""){
+        			alert("El ISBN es obligatorio!");
+        			return false;
+        		}else if(!$.isNumeric(isbn.val())){
+        			alert("El ISBN es incorrecto!");
+        			return false;
+        		}else if(titulo.val().trim()==""){
+        			alert("El titulo es obligatorio!");
+        			return false;
+        		}else if(autores.length==0){
+        			alert("El libro debe tener por lo menos 1 autor!");
+        			return false;
+        		}else if(!$.isNumeric(Date.parse(fecha.val()))){
+        			alert("La fecha es incorrecta!");
+        			return false;
+        		}else if(!$.isNumeric(precio.val())){
+        			alert("El precio es incorrecto!");
+        			return false;
+        		}else if(idioma.val().trim()==""){
+        			alert("El idioma es incorrecto!");
+        			return false;
+        		}else if(!$.isNumeric(paginas.val())){
+        			alert("Las páginas deben ser un número!");
+        			return false;
+        		}
+        		return true;
+        		
+        	}
+        </script>
         <style>
         	body{
         		background-image: url('website/img/1672440.png');

@@ -56,7 +56,7 @@
 			$id = isset($_REQUEST['auth_id'])? $_REQUEST['auth_id']:'';
 			$nombre = isset($_REQUEST['auth_nombre'])? $_REQUEST['auth_nombre']:'';
 			$apellido = isset($_REQUEST['auth_apellido'])? $_REQUEST['auth_apellido']:'';
-			$fecha_n = isset($_REQUEST['auth_fecha_n'])? $_REQUEST['auth_fecha_n']:'';
+			$fecha_n = isset($_REQUEST['auth_fecha_n'])? $_REQUEST['auth_fecha_n']:''; if (empty($fecha_n)) $fecha_n ="0000-00-00";
 			$lugar_n = isset($_REQUEST['auth_lugar_n'])? $_REQUEST['auth_lugar_n']:'';
 			
 			if (isset($_REQUEST['action'])){
@@ -102,10 +102,10 @@
 			$precio = isset($_REQUEST['libro_precio'])? $_REQUEST['libro_precio']:'';
 			$texto = isset($_REQUEST['libro_texto'])? $_REQUEST['libro_texto']:'';
 			$tags = isset($_REQUEST['libro_tags'])? $_REQUEST['libro_tags']:'';
-			$fecha = isset($_REQUEST['libro_fecha'])? $_REQUEST['libro_fecha']:'';
+			$fecha = isset($_REQUEST['libro_fecha'])? $_REQUEST['libro_fecha']:''; if (empty($fecha)) $fecha ="0000-00-00";
 			$autores = isset($_REQUEST['libro_autor'])? $_REQUEST['libro_autor']:'';
 			$paginas = isset($_REQUEST['libro_pag'])? $_REQUEST['libro_pag']:'';
-			$tapa = isset($_REQUEST['libro_tapa'])? $_REQUEST['libro_tapa']:'';
+			$tapa = isset($_REQUEST['libro_tapa'])? $_REQUEST['libro_tapa']:''; if (is_array($tapa)) $tapa=$tapa[0];
 		
 			
 			if (isset($_REQUEST['action'])){

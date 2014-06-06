@@ -5,7 +5,7 @@
  */
 class Conexion {
 	
-	private $local = FALSE;//Indica si estoy trabajando con un servidor local.
+	private $local = false;//Indica si estoy trabajando con un servidor local.
 	private $hostname = 'localhost';
 	private $port = '8080';
 	private $username = 'root';
@@ -410,7 +410,7 @@ class Books{
 		return self::$conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
 	}
 	
-	/** Retorna un array con objetos Book de ese autor. Notar que este metodo no diferencia entre libros eliminados y no eliminados */
+	/** Retorna un array con objetos Book de ese autor. Los libros NO estan eliminados */
 	static function getBooksBy($author_id){
 		self::initialize();
 		$result = self::$conexion->query("
@@ -419,7 +419,7 @@ class Books{
 			LEFT JOIN escribe E ON (A.ID=E.id_autor)
 			INNER JOIN libros L ON (E.id_libro=L.ID)
 			GROUP BY (L.ID)
-			HAVING autores LIKE '%$author_id%'
+			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0)
 		");
 		$books = Array();
 		if ($result){
@@ -823,6 +823,8 @@ class Authors{
 			return Authors::getAuthor($id);
 		}else{
 			print_r(self::$conexion->getLastError());
+			print_r($fecha_nacimiento);
+			echo "<p>$fecha_nacimiento</p>";
 			return NULL;
 		}
 	}

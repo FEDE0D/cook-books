@@ -102,6 +102,7 @@
 	                					<?php if ($AUTOR){ ?>
 		                					/** Envia los datos del formulario para ser actualizados*/
 		                					function saveAuthor(){
+		                						if (!validateAutor()) return;
 		                						$('#btn_save').button('loading');
 		                						$.ajax({
 													url:"ajax.php",
@@ -160,6 +161,7 @@
 	                					<?php if ($NUEVO_AUTOR){ ?>
 	                						/** Agrega un nuevo actor a la base de datos */
                 							function saveAuthor(){
+                								if (!validateAutor()) return;
                 								$('#btn_save').button('loading');
 		                						$.ajax({
 													url:"ajax.php",
@@ -175,7 +177,7 @@
 													},
 													success:function(data){
 														if(isNaN(data)){
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n');
+															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+data);
 															$('#error_alert').removeClass("hidden");
 														}else{
 															$('#error_alert').text('');
@@ -210,6 +212,23 @@
     		//Poner en foco el campo de nombre, solo cuando esta en modo NUEVO AUTOR
         	$('#auth_name').focus();
         <?php } ?>
+        	
+        	/** Valida los campos y retorna true/false si el formulario es valido*/
+        	function validateAutor(){
+        		var nombre	= $('#author_form').find('#auth_name');
+        		var apellido= $('#author_form').find('#auth_lastname');
+        		var fecha	= $('#author_form').find('#auth_birthdate');
+        		var lugar	= $('#author_form').find('#auth_birthplace');
+        		
+        		if (nombre.val().trim()==""){
+        			alert("El nombre es obligatorio!");
+        			return false;
+        		}else if (apellido.val().trim()==""){
+        			alert("El apellido es obligatorio!");
+        			return false;
+        		}
+        		return true;
+        	}
         </script>
         <style type="text/css">
         	body{
