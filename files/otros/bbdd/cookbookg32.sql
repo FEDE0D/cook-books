@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.2.2
+-- version 3.5.5
 -- http://www.phpmyadmin.net
 --
--- Servidor: localhost
--- Tiempo de generación: 06-06-2014 a las 23:12:47
--- Versión del servidor: 5.5.27
--- Versión de PHP: 5.4.7
+-- Servidor: db4free.net:3306
+-- Tiempo de generación: 07-06-2014 a las 00:08:22
+-- Versión del servidor: 5.6.19
+-- Versión de PHP: 5.3.28
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `autor` (
   `lugar_nacimiento` varchar(50) COLLATE utf8_unicode_ci DEFAULT '',
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=118 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=121 ;
 
 --
 -- Volcado de datos para la tabla `autor`
@@ -48,7 +48,10 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 (104, 'Christine', 'Bailey', '2014-05-06', 'Madrid', 0),
 (105, 'Tonio', 'Rodriguez', '0000-00-00', '', 0),
 (106, 'Cecilia', 'Fassardini', '2014-00-00', '', 0),
-(117, 'Federico', 'Pacheco', '0000-00-00', '', 0);
+(117, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(118, 'Federico', 'Pacheco', '2015-01-01', 'asdasd', 1),
+(119, 'Federico', 'Pacheco', '2014-01-01', '', 1),
+(120, 'Federico', 'Pacheco', '0000-00-00', '', 1);
 
 -- --------------------------------------------------------
 
@@ -61,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `escribe` (
   `id_libro` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=89 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=93 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
@@ -77,10 +80,11 @@ INSERT INTO `escribe` (`id`, `id_libro`, `id_autor`) VALUES
 (64, 10, 117),
 (67, 11, 117),
 (69, 12, 117),
-(81, 1, 100),
 (82, 4, 103),
 (87, 14, 117),
-(88, 13, 117);
+(88, 13, 117),
+(89, 1, 100),
+(92, 15, 117);
 
 -- --------------------------------------------------------
 
@@ -90,33 +94,32 @@ INSERT INTO `escribe` (`id`, `id_libro`, `id_autor`) VALUES
 
 CREATE TABLE IF NOT EXISTS `libros` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
-  `ISBN` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `titulo` varchar(50) CHARACTER SET latin1 NOT NULL,
-  `IDIOMA` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
-  `paginas` int(11) NOT NULL,
-  `precio` float NOT NULL,
-  `fecha` date NOT NULL,
+  `ISBN` varchar(10) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `titulo` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT '',
+  `IDIOMA` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `paginas` int(11) NOT NULL DEFAULT '0',
+  `precio` float NOT NULL DEFAULT '0',
+  `fecha` date NOT NULL DEFAULT '0000-00-00',
   `etiquetas` varchar(100) CHARACTER SET latin1 NOT NULL DEFAULT '',
   `texto` text COLLATE utf8_unicode_ci,
   `tapa` text COLLATE utf8_unicode_ci,
-  `eliminado` tinyint(1) NOT NULL,
+  `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=16 ;
 
 --
 -- Volcado de datos para la tabla `libros`
 --
 
 INSERT INTO `libros` (`ID`, `ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`) VALUES
-(1, '882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro4.jpg', 0),
+(1, '882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', '', 0),
 (2, '123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0),
 (3, '879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0),
 (4, '888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0),
 (5, '878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', '', 'libro5.jpg', 0),
 (6, '1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0),
 (7, '2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0),
-(13, '1234', 'Federico', '', 0, 0, '0000-00-00', '', 'Esta es la descripcion del libro', 'carro.png', 1),
-(14, '1234', '', '', 0, 0, '0000-00-00', '', '', 'Folder.png', 1);
+(15, '123', 'Titulo del libro', 'Español', 123, 199.99, '2014-02-01', '', '', '', 1);
 
 -- --------------------------------------------------------
 
