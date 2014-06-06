@@ -129,7 +129,6 @@
 						echo $libro->save()? 'true':'false';
 					}else{
 						echo 'false';
-                        echo "id: $id_libro";
 					}
 				}else if ($_REQUEST['action']=='REMOVE'){// eliminar libro
 				    $libro = Books::getBook($id_libro);

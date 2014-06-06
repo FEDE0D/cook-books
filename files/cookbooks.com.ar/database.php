@@ -5,7 +5,7 @@
  */
 class Conexion {
 	
-	private $local = TRUE;//Indica si estoy trabajando con un servidor local.
+	private $local = FALSE;//Indica si estoy trabajando con un servidor local.
 	private $hostname = 'localhost';
 	private $port = '8080';
 	private $username = 'root';

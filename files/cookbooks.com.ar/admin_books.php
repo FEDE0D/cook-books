@@ -19,9 +19,9 @@
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		
 		<!-- Carga de imagenes -->
-		<link href="http://hayageek.github.io/jQuery-Upload-File/uploadfile.min.css" rel="stylesheet">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-		<script src="http://hayageek.github.io/jQuery-Upload-File/jquery.uploadfile.min.js"></script>
+		<link href="website/uploadFile/uploadfile.min.css" rel="stylesheet">
+		<script src="website/uploadFile/jquery.min.js"></script>
+		<script src="website/uploadFile/jquery.uploadfile.min.js"></script>
 		<!-- Carga de imagenes -->
     </head>
     <body>
