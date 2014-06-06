@@ -69,10 +69,13 @@
                 
                 <div class="col-md-8 <?php if (!$AUTOR && !$NUEVO_AUTOR){ echo "hidden";} ?>">
                 	<div class="panel panel-default">
-                		<div class="panel-heading">Autor:<strong><?php
-                				if ($AUTOR) echo $AUTOR->getNombreApellido();
-								elseif($NUEVO_AUTOR) echo "Nuevo Autor"; 
-                				?></strong>
+                		<div class="panel-heading">Autor: 
+                			<strong>
+                				<?php
+	                				if ($AUTOR) echo $AUTOR->getNombreApellido();
+									elseif($NUEVO_AUTOR) echo "Nuevo Autor"; 
+                				?>
+                			</strong>
                 		</div>
                 		<div class="panel-body" style="max-height: 475px; min-height:475px;">
                 			<div class="">

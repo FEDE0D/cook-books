@@ -94,7 +94,9 @@
 				}
 			}
 		}else if ($_REQUEST['type']=='libro'){//	Libro
-			$isbn = isset($_REQUEST['libro_ISBN'])? $_REQUEST['libro_ISBN']:'';
+			
+            $id_libro = isset($_REQUEST['libro_ID'])? $_REQUEST['libro_ID']:'';
+			$isbn = isset($_REQUEST['libro_ISBN'])? $_REQUEST['libro_ISBN']:''; $isbn = substr($isbn, 0, 10);
 			$titulo = isset($_REQUEST['libro_titulo'])? $_REQUEST['libro_titulo']:'';
 			$idioma = isset($_REQUEST['libro_idioma'])? $_REQUEST['libro_idioma']:'';
 			$precio = isset($_REQUEST['libro_precio'])? $_REQUEST['libro_precio']:'';
@@ -108,16 +110,14 @@
 			
 			if (isset($_REQUEST['action'])){
 				if ($_REQUEST['action']=='NEW'){//	agregar nuevo libro
-				
-					$libro = Books::newBooks($isbn, $titulo, $idioma, $fecha, $tags, $precio, $texto, $autor, $paginas, $tapa);	
-					
-					echo $libro? $libro->getISBN():'false';
+					$libro = Books::newBook($isbn, $titulo, $idioma, $fecha, $tags, $precio, $texto, $autores, $paginas, $tapa);
+					echo $libro? $libro->getID():'false';
 				}else if ($_REQUEST['action']=='UPDATE'){//	actualizar libro
-					$libro = Books::getBook($isbn);
+					$libro = Books::getBook($id_libro);
 					if ($libro){
-					
+					    $libro->setISBN($isbn);
 						$libro->setTitulo($titulo);
-						$libro->setAutor($autor);
+						$libro->setAutores($autores);
 						$libro->setEtiquetas($tags);
 						$libro->setIdioma($idioma);
 						$libro->setPrecio($precio);
@@ -125,12 +125,24 @@
 						$libro->setTapa($tapa);
 						$libro->setTexto($texto);
 						$libro->setFecha($fecha);
+						
 						echo $libro->save()? 'true':'false';
 					}else{
 						echo 'false';
+                        echo "id: $id_libro";
 					}
 				}else if ($_REQUEST['action']=='REMOVE'){// eliminar libro
-					
+				    $libro = Books::getBook($id_libro);
+                    if ($libro){
+                        $libro->setEliminado(1);
+                        if ($libro->save()){
+                            echo 'true';
+                        }else{
+                            echo 'false';
+                        }
+                    }else{
+                        echo 'false';
+                    }
 				}
 			}
 			
