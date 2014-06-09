@@ -5,7 +5,7 @@
  */
 class Conexion {
 	
-	private $local = false;//Indica si estoy trabajando con un servidor local.
+	private $local = TRUE;//Indica si estoy trabajando con un servidor local.
 	private $hostname = 'localhost';
 	private $port = '8080';
 	private $username = 'root';
@@ -17,11 +17,11 @@ class Conexion {
 
 	function __construct(){
 		if (!$this->local){
-			$this->hostname = 'db4free.net';
+			$this->hostname = 'mysql.nixiweb.com';
 			$this->port = '3306';
-			$this->username = 'federico';
-			$this->password = 'federico';
-			$this->dbname = 'cookbookg32';
+			$this->username = 'u847065820_root';
+			$this->password = 'dvVq47UfJ6';
+			$this->dbname = 'u847065820_cb';
 		}
 	}
 	
@@ -337,11 +337,11 @@ class Books{
 	static function getLibros(){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ID, L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM libros L
-			LEFT JOIN escribe E ON (L.ID=E.id_libro)
+			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			WHERE(L.eliminado=0)
-			GROUP BY L.ID
+			GROUP BY L.ISBN
 		");
 				
 		$libros = array();
@@ -356,14 +356,14 @@ class Books{
 	}
 	
 	/**Devuelve un objeto Book o NULL si no existe. El libro puede estar eliminado. */
-	static function getBook($bookID){
+	static function getBook($bookISBN){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ID, L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM libros L
-			LEFT JOIN escribe E ON (L.ID=E.id_libro)
-			GROUP BY L.ID
-			HAVING (L.ID=$bookID)
+			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
+			GROUP BY L.ISBN
+			HAVING (L.ISBN=$bookISBN)
 		");
 		if ($result && $result->rowCount()>0){
 			$bookInfo = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -376,11 +376,11 @@ class Books{
 	static function getBestSellers($cantidad){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ID, L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM libros L
-			LEFT JOIN escribe E ON (L.ID=E.id_libro)
+			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			WHERE (L.eliminado=0)
-			Group by L.ID
+			Group by L.ISBN
 			LIMIT $cantidad
 		");
 		$resultado = Array();
@@ -402,7 +402,7 @@ class Books{
 		$result = self::$conexion->query("
 			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.apellido) as autor, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas
 			FROM libros L
-			LEFT JOIN escribe E ON (L.ID=E.id_libro)
+			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			LEFT JOIN autor A ON (E.id_autor=A.ID)
 			WHERE (L.eliminado=0)
 			Group by L.ISBN
@@ -414,11 +414,11 @@ class Books{
 	static function getBooksBy($author_id){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ID, L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
 			FROM autor A
 			LEFT JOIN escribe E ON (A.ID=E.id_autor)
-			INNER JOIN libros L ON (E.id_libro=L.ID)
-			GROUP BY (L.ID)
+			INNER JOIN libros L ON (L.ISBN=E.isbn)
+			GROUP BY (L.ISBN)
 			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0)
 		");
 		$books = Array();
@@ -433,7 +433,8 @@ class Books{
 		return $books;
 	}
 	
-	/** Crea un nuevo libro. $autores es un string con IDs de autores separados por comas. */
+	/** Crea un nuevo libro. $autores es un string con IDs de autores separados por comas. 
+	 * Retorna un objeto Book si pudo crear el libro, caso contrario un numero de error*/
 	public static function newBook($ISBN, $titulo, $idioma, $fecha, $tags, $precio, $texto, $autores, $paginas, $tapa){
 		self::initialize();
 		$autores = explode(",", $autores);
@@ -468,32 +469,31 @@ class Books{
 		");
 		
 		if ($result){//Inserto los datos de los autores
-			//obtengo el id del libro agregado
-			$id_libro = self::$conexion->getLastInsertedID();
 			$query = "
-                INSERT INTO `escribe`(`id`, `id_libro`, `id_autor`)
+                INSERT INTO `escribe`(`id`, `isbn`, `id_autor`)
                 VALUES 
             ";
             foreach ($autores as $key => $value) {
-                $query .= "(NULL, $id_libro, $value),";
+                $query .= "(NULL, $ISBN, $value),";
             }
             $queryEscribe = substr($query,0,-1);
             
 			$result2 = self::$conexion->query($queryEscribe);
 			if ($result2){
-				return Books::getBook($id_libro);
+				return Books::getBook($ISBN);
 			}else{
-				return NULL;
+				return -1;
 			}
 		}else{
 		    //Error: No se pudo agregar, ISBN repetido o falta de parametros
-			return NULL;
+			return -2;
 		}
 	}
+
+	/** Guarda los datos del Book $libro en la base de datos */
 	public static function updateBook(Book $libro){
 		self::initialize();
 		
-		$id_libro = $libro->getID();
 		$isbn = $libro->getISBN();
 		$titulo = $libro->getTitulo();
 		$idioma = $libro->getIdioma();
@@ -509,7 +509,6 @@ class Books{
 		$result = self::$conexion->query("
 			UPDATE  libros
 			SET
-			ISBN = '$isbn', 
 			titulo = '$titulo',
 			IDIOMA = '$idioma',
 			paginas = '$paginas',
@@ -519,24 +518,24 @@ class Books{
 			texto = '$texto',
 			tapa = '$tapa',
 			eliminado = '$eliminado'
-			WHERE (ID = $id_libro)
+			WHERE (ISBN = $isbn)
 		");
 		if ($result){
 			//	Baja de las conexiones de autores de este libro en tabla Escritos
 			$result2 = self::$conexion->query("
 				DELETE FROM escribe
-				WHERE (id_libro=$id_libro)
+				WHERE (isbn=$isbn)
 			");
 			if ($result2){
 				//	Dar de alta las conexiones de autores de este libro en tabla Escritos
 				$autores = explode(",", $autores);
 				
 				$query = "
-					INSERT INTO escribe(`id`, `id_libro`, `id_autor`)
+					INSERT INTO escribe(`id`, `isbn`, `id_autor`)
 					VALUES 
 				";
 				foreach ($autores as $key => $value) {
-					$query .= "(NULL, $id_libro, $value),";
+					$query .= "(NULL, $isbn, $value),";
 				}
 				$queryEscribe = substr($query,0,-1);
 				$result3 = self::$conexion->query($queryEscribe);
@@ -555,8 +554,7 @@ class Books{
 
 class Book{
 	
-	private	$ID,
-	        $ISBN,
+	private	$ISBN,//no se puede modificar, si se quiere cambiar, se debe realizar una baja y alta
 			$titulo,
 			$paginas,
 			$precio,
@@ -569,7 +567,6 @@ class Book{
 			$autores; //es un string de id de autor separados por comas
 			
 	function __construct($param){
-	    $this->ID = $param['ID'];
 		$this->ISBN = $param['ISBN'];
 		$this->titulo = $param['titulo']? $param['titulo']:'';
 		$this->paginas = $param['paginas']? $param['paginas']:'0';
@@ -582,10 +579,6 @@ class Book{
 		$this->eliminado = $param['eliminado']? $param['eliminado']:'0';
 		$this->autores = $param['autores']? $param['autores']:'';
 	}
-	
-    function getID(){
-        return $this->ID;
-    }
     
 	function getISBN(){
 		return $this->ISBN;
@@ -661,10 +654,6 @@ class Book{
 	function getEliminado(){
 		return $this->eliminado;
 	}
-    
-    function setISBN($isbn){
-        $this->ISBN=$isbn;
-    }
 	
 	function setTitulo($titulo){
 		$this->titulo=$titulo;
@@ -751,6 +740,25 @@ class Authors{
 		return $authors;
 	}
 	
+	/** Retorna un array de objetos Author con el mismo $nombre y $apellido que pertenezca a la base de datos.
+	 * NOTE: el autor NO esta eliminado*/
+	public static function getAuthorsByName($nombre, $apellido){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT *
+			FROM autor
+			WHERE ((nombre LIKE '$nombre' AND apellido LIKE '$apellido') AND eliminado=0)
+		");
+		$authors = array();
+		if($result){
+			$authorsData = $result->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($authorsData as $key => $info) {
+				array_push($authors, new Author($info));
+			}
+		}
+		return $authors;
+	}
+	
 	/** Retorna un objeto Author si existe un autor en la base de dato, NULL caso contrario*/
 	public static function getAuthor($ID){
 		self::initialize();
@@ -796,7 +804,8 @@ class Authors{
 		return FALSE;
 	}
 	
-	/** Retorna un objeto Author si pudo agregar a la base de datos, NULL caso contrario */
+	/** Retorna un objeto Author si pudo agregar a la base de datos, NULL caso contrario
+	 * NOTA: No se pueden agregar autores con el mismo nombre */
 	public static function newAuthor($nombre, $apellido, $fecha_nacimiento, $lugar_nacimiento){
 		self::initialize();
 		$result = self::$conexion->query("

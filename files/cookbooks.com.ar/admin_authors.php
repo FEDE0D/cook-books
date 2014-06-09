@@ -104,6 +104,7 @@
 		                					function saveAuthor(){
 		                						if (!validateAutor()) return;
 		                						$('#btn_save').button('loading');
+		                						$('#error_alert').text(''); $('#error_alert').addClass("hidden");
 		                						$.ajax({
 													url:"ajax.php",
 													type:"POST",
@@ -117,12 +118,14 @@
 														auth_lugar_n: $('#author_form').find('#auth_birthplace').val()
 													},
 													success:function(data){
-														if(data=='true'){
+														var resp = $.parseJSON(data);
+														
+														if (resp.ok){
 															$('#error_alert').text('');
 															$('#error_alert').addClass("hidden");
 															location.reload();
 														}else{
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n');
+															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+resp.message);
 															$('#error_alert').removeClass("hidden");
 														}
 														$('#btn_save').button('reset');
@@ -138,6 +141,7 @@
 		                					/** Borra el autor */
 		                					function deleteAuthor(){
 		                						$('#btn_delete').button('loading');
+		                						$('#error_alert').text(''); $('#error_alert').addClass("hidden");
 		                						$.ajax({
 		                							url:"ajax.php",
 		                							type:"POST",
@@ -147,11 +151,13 @@
 		                								auth_id:"<?php echo $AUTOR->getID(); ?>"
 		                							},
 		                							success:function(data){
-		                								if (data=="true"){
-		                									alert("El autor fue eliminado correctamente");
+		                								var resp = $.parseJSON(data);
+		                								if (resp.ok){
+		                									alert("El autor fue eliminado correctamente!");
 		                									window.location.href = "admin_authors.php";
 		                								}else{
-		                									alert("Error al eliminar al autor\nIntente nuevamente");
+		                									$('#error_alert').text('Error al eliminar autor\nPor favor intente nuevamente.\n'+resp.message);
+															$('#error_alert').removeClass("hidden");
 		                								}
 		                								$('#btn_delete').button('reset');
 		                							}
@@ -163,6 +169,7 @@
                 							function saveAuthor(){
                 								if (!validateAutor()) return;
                 								$('#btn_save').button('loading');
+                								$('#error_alert').text(''); $('#error_alert').addClass("hidden");
 		                						$.ajax({
 													url:"ajax.php",
 													type:"POST",
@@ -176,13 +183,19 @@
 														auth_lugar_n: $('#author_form').find('#auth_birthplace').val()
 													},
 													success:function(data){
-														if(isNaN(data)){
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+data);
-															$('#error_alert').removeClass("hidden");
+														var resp = $.parseJSON(data);
+														if (resp.ok){
+															if ($.isNumeric(resp.id_new)){
+																$('#error_alert').text('');
+																$('#error_alert').addClass("hidden");
+																window.location.href = "admin_authors.php?id="+resp.id_new;
+															}else{
+																$('#error_alert').text('Error al agregar el nuevo autor\nPor favor intente nuevamente.\n'+resp.message);
+																$('#error_alert').removeClass("hidden");
+															}
 														}else{
-															$('#error_alert').text('');
-															$('#error_alert').addClass("hidden");
-															window.location.href = "admin_authors.php?id="+data;
+															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+resp.message);
+															$('#error_alert').removeClass("hidden");
 														}
 														$('#btn_save').button('reset');
 													}

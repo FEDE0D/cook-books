@@ -38,6 +38,11 @@
 	    ?>
         <div class="container-fluid text-center">
             <div class="row">
+            	<div class="col-md-12" style="background-color: #FEDE0D;">
+            		<p>TODO:</p>
+            		<p>Implementar "mostrar/ocultar" libro en el catálogo. (ocultar venta)</p>
+            		
+            	</div>
                 <div class="col-md-4">
                 	<div class="panel panel-default">
                 		<div class="panel-heading">Libros registrados</div>
@@ -47,7 +52,7 @@
 	            					$libros = Books::getLibros();
 	            					foreach ($libros as $key => $value) { 
             					?>
-										<a id="libro_<?php echo $value->getID(); ?>" href="admin_books.php?id=<?php echo $value->getID(); ?>" class="list-group-item <?php if ($ID_ACTIVE==$value->getID()) echo 'active' ?>">
+										<a id="libro_<?php echo $value->getISBN(); ?>" href="admin_books.php?id=<?php echo $value->getISBN(); ?>" class="list-group-item <?php if ($ID_ACTIVE==$value->getISBN()) echo 'active' ?>">
 											<?php echo $value->getTitulo().' ('.$value->getAutoresString().')'; ?>
 										</a>
 								<?php
@@ -78,8 +83,8 @@
                 		</div>
                 		<div class="panel-body" style="max-height: auto; min-height:475px;">
                 			<form id="libro_form" role="form" class="" enctype="multipart/form-data">
-                				<input id="libro_ID" type="hidden" value="<?php if($LIBRO) echo $LIBRO->getID(); ?>"/>
-                				
+                				<input id="libro_old_ISBN" type="hidden" value="<?php if($LIBRO) echo $LIBRO->getISBN(); ?>"/>
+                				<!-- En modificaciones, necesito el ISBN anterior para ver si cambio -->
                 				<div class="row">
 	                				<div class="col-xs-4">
 	                					<label for="libro_ISBN" class="pull-left">ISBN</label>
@@ -145,14 +150,14 @@
                 				<div class="col-md-12">
 	            					<label for="libro_texto" class="pull-left">Descripcion</label>
 	            					<div class="col-lg-10">
-								        <textarea class="form-control" rows="3" id="libro_texto" ><?php if ($LIBRO) echo $LIBRO->getTexto() ?></textarea>
+								        <textarea class="form-control" rows="1" id="libro_texto" ><?php if ($LIBRO) echo $LIBRO->getTexto() ?></textarea>
 							        </div>
 						        </div>
 						        
 						        <!-- Carga de imagenes -->
                                 <div class="col-md-12">
                                 	<label for="img_load_btn" class="pull-left">Tapa</label><br /><br />
-									<div id="fileuploader" >Upload</div>
+									<div id="fileuploader">Upload</div>
                     				<img id="img_tapa" src="books/img/tapas/<?php
                     					$path = "_DEFAULT_.jpg";
 										if ($LIBRO){
@@ -171,6 +176,9 @@
 														url:"upload.php",
 														allowedTypes:"png,gif,jpg,jpeg",
 														fileName:"myfile",
+														showStatusAfterSuccess:false,
+														showAbort:false,
+														showDone:false,
 														onSuccess:function(files,data,xhr){
 															$("#img_tapa").attr("src","books/img/tapas/"+files);
 															$("#img_tapa").val(files);
@@ -204,7 +212,7 @@
 												data:{
 													type: "libro",
 													action: "UPDATE",
-													libro_ID: $('#libro_form').find('#libro_ID').val(),
+													libro_old_ISBN: $('#libro_form').find('#libro_old_ISBN').val(),
 													libro_ISBN: $('#libro_form').find('#libro_ISBN').val(),
 													libro_titulo: $('#libro_form').find('#libro_titulo').val(),
 													libro_idioma: $('#libro_form').find('#libro_idioma').val(),
@@ -217,12 +225,13 @@
 													libro_pag: $('#libro_form').find('#libro_pag').val()
 												},
 												success:function(data){
-													if(data=='true'){
+													var resp = $.parseJSON(data);
+													if (resp.ok){
 														$('#error_alert').text('');
 														$('#error_alert').addClass("hidden");
 														location.reload();
 													}else{
-														$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+data);
+														$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
 														$('#error_alert').removeClass("hidden");
 													}
 													$('#btn_save').button('reset');
@@ -236,23 +245,25 @@
 	                					    if (!confirm("De verdad desea eliminar este libro?")) return;
 	                					    
 	                					    $("#btn_delete").button("loading");
+	                					    $('#error_alert').text('');	$('#error_alert').addClass("hidden");
 	                						$.ajax({
 	                						    url:"ajax.php",
 	                						    type:"POST",
 	                						    data:{
 	                						        type:"libro",
 	                						        action:"REMOVE",
-	                						        libro_ID:$('#libro_form').find('#libro_ID').val()
+	                						        libro_ISBN:$('#libro_form').find('#libro_ISBN').val()
 	                						    },
 	                						    success: function(data){
-	                						        if(data=='true'){
+	                						    	var resp = $.parseJSON(data);
+	                						    	if (resp.ok){
                                                         $('#error_alert').text('');
                                                         $('#error_alert').addClass("hidden");
                                                         window.location.href="admin_books.php";
-                                                    }else{
-                                                        $('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+data);
+	                						    	}else{
+                                                        $('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
                                                         $('#error_alert').removeClass("hidden");
-                                                    }
+	                						    	}
                                                     $("#btn_delete").button("reset");
 	                						    }
 	                						});
@@ -271,8 +282,9 @@
                                                 }
                                             );
                                             autores_param = autores_param.substring(0,autores_param.length-1);
+                                            
             								$('#btn_save').button('loading');
-            								
+            								$('#error_alert').text('');	$('#error_alert').addClass("hidden");
 	                						$.ajax({
 												url:"ajax.php",
 												type:"POST",
@@ -291,13 +303,19 @@
 													libro_pag: $('#libro_form').find('#libro_pag').val()
 												},
 												success:function(data){
-													if(isNaN(data)){
-														$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+data);
-														$('#error_alert').removeClass("hidden");
+													var resp = $.parseJSON(data);
+													if (resp.ok){
+														if ($.isNumeric(resp.id_new)){
+															$('#error_alert').text('');
+															$('#error_alert').addClass("hidden");
+															window.location.href = "admin_books.php?id="+resp.id_new;
+														}else{
+															$('#error_alert').text('Error al agregar libro\nPor favor intente nuevamente.\n');
+															$('#error_alert').removeClass("hidden");
+														}
 													}else{
-														$('#error_alert').text('');
-														$('#error_alert').addClass("hidden");
-														window.location.href = "admin_books.php?id="+data;
+														$('#error_alert').text('Error al agregar libro\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
+														$('#error_alert').removeClass("hidden");
 													}
 													$('#btn_save').button('reset');
 												}

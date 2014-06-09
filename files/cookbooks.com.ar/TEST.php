@@ -9,13 +9,12 @@
 	<body>
 		<?php
 			include_once('database.php');
-			$cart = new Cart;
-			
 		?>
 		
 		<button onclick="printCarrito()">CART PRINT</button><br>
 		<button onclick="agregarACarrito()">CART ADD</button><br>
 		<button onclick="nuevoAutor()">NEW AUTHOR</button><br>
+		<button onclick="testJSON()">Test JSON</button>
 		<script>
 			function agregarACarrito(){
 				$.ajax({
@@ -59,6 +58,19 @@
 					},
 					success:function(data){
 						$("#result").html(data);
+					}
+				});
+			}
+			function testJSON(){
+				$.ajax({
+					url:"ajax.php",
+					type:"POST",
+					data:{
+						type: "JSON"
+					},
+					success:function(data){
+						var result = $.parseJSON(data);
+						$("#result").text(result.result+" "+result.cant+" "+result.datos);
 					}
 				});
 			}

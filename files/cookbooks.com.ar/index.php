@@ -40,7 +40,7 @@
 								<?php
 								foreach ($books as $key => $book) {	?>
 									<tr >
-										<td class="text-left resaltado" onclick="location='product.php?id=<?php echo $book->getID() ?>'">
+										<td class="text-left resaltado" onclick="location='product.php?id=<?php echo $book->getISBN() ?>'">
 											<div class="col-md-3"><img src="books/img/tapas/<?php echo $book->getTapa() ?>" class="img-rounded img-responsive" style="margin: 0 auto; height: 80px;"></div>
 											<div class="col-md-9">
 												<strong>Título</strong>: <?php echo $book->getTitulo(); ?></br>
