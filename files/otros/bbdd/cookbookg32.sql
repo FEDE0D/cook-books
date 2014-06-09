@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.5
+-- version 3.5.2.2
 -- http://www.phpmyadmin.net
 --
--- Servidor: db4free.net:3306
--- Tiempo de generación: 07-06-2014 a las 00:08:22
--- Versión del servidor: 5.6.19
--- Versión de PHP: 5.3.28
+-- Servidor: localhost
+-- Tiempo de generación: 09-06-2014 a las 08:08:54
+-- Versión del servidor: 5.5.27
+-- Versión de PHP: 5.4.7
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `autor` (
   `lugar_nacimiento` varchar(50) COLLATE utf8_unicode_ci DEFAULT '',
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=121 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=134 ;
 
 --
 -- Volcado de datos para la tabla `autor`
@@ -45,13 +45,8 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 (101, 'Kristen', 'Feola', '1961-12-20', 'Sprinfield', 0),
 (102, 'Mirta G.', 'Carabajal', '1951-10-17', 'Buenos Aires', 0),
 (103, 'Doña', 'Gandulfo', '1896-06-29', 'Santiago del Estero, Argentina', 0),
-(104, 'Christine', 'Bailey', '2014-05-06', 'Madrid', 0),
-(105, 'Tonio', 'Rodriguez', '0000-00-00', '', 0),
-(106, 'Cecilia', 'Fassardini', '2014-00-00', '', 0),
-(117, 'Federico', 'Pacheco', '0000-00-00', '', 1),
-(118, 'Federico', 'Pacheco', '2015-01-01', 'asdasd', 1),
-(119, 'Federico', 'Pacheco', '2014-01-01', '', 1),
-(120, 'Federico', 'Pacheco', '0000-00-00', '', 1);
+(104, 'Tonio', 'Rodriguez', '0000-00-00', '', 0),
+(105, 'Cecilia', 'Fassardini', '2014-00-00', '', 0);
 
 -- --------------------------------------------------------
 
@@ -61,30 +56,27 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 
 CREATE TABLE IF NOT EXISTS `escribe` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
-  `id_libro` int(40) NOT NULL,
+  `isbn` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=93 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=131 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
 --
 
-INSERT INTO `escribe` (`id`, `id_libro`, `id_autor`) VALUES
-(42, 2, 101),
-(43, 3, 102),
-(45, 5, 104),
-(46, 6, 105),
-(47, 7, 106),
-(48, 3, 103),
-(64, 10, 117),
-(67, 11, 117),
-(69, 12, 117),
-(82, 4, 103),
-(87, 14, 117),
-(88, 13, 117),
-(89, 1, 100),
-(92, 15, 117);
+INSERT INTO `escribe` (`id`, `isbn`, `id_autor`) VALUES
+(105, 882894293, 100),
+(106, 123456789, 101),
+(107, 879548481, 102),
+(108, 888444777, 103),
+(109, 878987655, 104),
+(110, 1478523698, 105),
+(111, 2147483647, 104),
+(112, 2147483647, 105),
+(128, 1234, 102),
+(129, 1234, 101),
+(130, 1234, 103);
 
 -- --------------------------------------------------------
 
@@ -93,7 +85,6 @@ INSERT INTO `escribe` (`id`, `id_libro`, `id_autor`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `libros` (
-  `ID` int(11) NOT NULL AUTO_INCREMENT,
   `ISBN` varchar(10) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `titulo` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT '',
   `IDIOMA` varchar(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
@@ -104,22 +95,22 @@ CREATE TABLE IF NOT EXISTS `libros` (
   `texto` text COLLATE utf8_unicode_ci,
   `tapa` text COLLATE utf8_unicode_ci,
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=16 ;
+  PRIMARY KEY (`ISBN`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `libros`
 --
 
-INSERT INTO `libros` (`ID`, `ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`) VALUES
-(1, '882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', '', 0),
-(2, '123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0),
-(3, '879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0),
-(4, '888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0),
-(5, '878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', '', 'libro5.jpg', 0),
-(6, '1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0),
-(7, '2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0),
-(15, '123', 'Titulo del libro', 'Español', 123, 199.99, '2014-02-01', '', '', '', 1);
+INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`) VALUES
+('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro1.jpg', 0),
+('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0),
+('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0),
+('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0),
+('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Descripcion', 'libro5.jpg', 0),
+('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0),
+('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0),
+('1234', '12', 'Español', 12, 12, '0004-03-12', '', '', '', 1);
 
 -- --------------------------------------------------------
 
