@@ -1,11 +1,12 @@
+
 -- phpMyAdmin SQL Dump
 -- version 3.5.2.2
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 09-06-2014 a las 08:08:54
--- Versión del servidor: 5.5.27
--- Versión de PHP: 5.4.7
+-- Tiempo de generación: 11-06-2014 a las 20:02:10
+-- Versión del servidor: 5.1.61
+-- Versión de PHP: 5.2.17
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -17,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `cookbookg32`
+-- Base de datos: `u847065820_cb`
 --
 
 -- --------------------------------------------------------
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `autor` (
   `lugar_nacimiento` varchar(50) COLLATE utf8_unicode_ci DEFAULT '',
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=134 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=137 ;
 
 --
 -- Volcado de datos para la tabla `autor`
@@ -46,7 +47,10 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 (102, 'Mirta G.', 'Carabajal', '1951-10-17', 'Buenos Aires', 0),
 (103, 'Doña', 'Gandulfo', '1896-06-29', 'Santiago del Estero, Argentina', 0),
 (104, 'Tonio', 'Rodriguez', '0000-00-00', '', 0),
-(105, 'Cecilia', 'Fassardini', '2014-00-00', '', 0);
+(105, 'Cecilia', 'Fassardini', '2014-00-00', '', 0),
+(134, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(135, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(136, 'Federico', 'Pacheco', '0000-00-00', '', 1);
 
 -- --------------------------------------------------------
 
@@ -59,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `escribe` (
   `isbn` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=131 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=131 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
@@ -95,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `libros` (
   `texto` text COLLATE utf8_unicode_ci,
   `tapa` text COLLATE utf8_unicode_ci,
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
+  `hidden` tinyint(1) NOT NULL,
   PRIMARY KEY (`ISBN`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -102,15 +107,15 @@ CREATE TABLE IF NOT EXISTS `libros` (
 -- Volcado de datos para la tabla `libros`
 --
 
-INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`) VALUES
-('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro1.jpg', 0),
-('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0),
-('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0),
-('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0),
-('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Descripcion', 'libro5.jpg', 0),
-('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0),
-('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0),
-('1234', '12', 'Español', 12, 12, '0004-03-12', '', '', '', 1);
+INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`, `hidden`) VALUES
+('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro1.jpg', 0, 0),
+('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0, 0),
+('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0, 0),
+('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0, 0),
+('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Descripcion', 'libro5.jpg', 0, 0),
+('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0, 0),
+('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0, 0),
+('1234', '12', 'Español', 12, 12, '0004-03-12', '', '', '', 1, 0);
 
 -- --------------------------------------------------------
 
