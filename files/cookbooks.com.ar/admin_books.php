@@ -37,22 +37,27 @@
 	    	}
 	    ?>
         <div class="container-fluid text-center">
+        	<div class="alert alert-danger">
+	        	FALTA IMPLEMENTAR!:<br />
+	        	cambiar ISBN a un libro, checkear si ya existe ese ISBN
+        	</div> 
             <div class="row">
-            	<div class="col-md-12" style="background-color: #FEDE0D;">
-            		<p>TODO:</p>
-            		<p>Implementar "mostrar/ocultar" libro en el catálogo. (ocultar venta)</p>
-            		
-            	</div>
                 <div class="col-md-4">
                 	<div class="panel panel-default">
                 		<div class="panel-heading">Libros registrados</div>
                 		<div class="panel-body" style="max-height: 475px; min-height:475px; overflow-y: scroll;">
                 			<div class="list-group text-left">
                 				<?php
-	            					$libros = Books::getLibros();
+	            					$libros = Books::getBooksAvailable();
 	            					foreach ($libros as $key => $value) { 
             					?>
-										<a id="libro_<?php echo $value->getISBN(); ?>" href="admin_books.php?id=<?php echo $value->getISBN(); ?>" class="list-group-item <?php if ($ID_ACTIVE==$value->getISBN()) echo 'active' ?>">
+										<a	id="libro_<?php echo $value->getISBN(); ?>" 
+											href="admin_books.php?id=<?php echo $value->getISBN(); ?>"
+											<?php if ($value->getOculto()){ ?>
+											style="color: #999999; font-weight: bold;"
+											<?php } ?>
+											class="list-group-item <?php if ($ID_ACTIVE==$value->getISBN()) echo 'active' ?>"
+											>
 											<?php echo $value->getTitulo().' ('.$value->getAutoresString().')'; ?>
 										</a>
 								<?php
@@ -63,9 +68,18 @@
                 		<div class="panel-footer">
                 			<div class="container-fluid">
 	                			<a class="btn btn-sm btn-default pull-left" onclick="window.location.href='admin_books.php?new=1'">Nuevo libro</a>
-	                			<?php if($LIBRO){ ?>
-	                				<a id="btn_delete" class="btn btn-sm btn-info pull-right" onclick="deleteLibro()" data-loading-text="Borrando...">Borrar</a>
-	                			<?php } ?>
+	                			<?php 
+	                			if($LIBRO){
+	                				if ($LIBRO->getOculto()){ ?>
+	                					<a id="btn_delete" class="btn btn-sm btn-info pull-right" onclick="deleteLibro()" data-loading-text="Borrando..." title="Borrar este libro del sistema">Borrar</a>
+	                					<a id="btn_show" class="btn btn-sm btn-info pull-right" onclick="showLibro()" data-loading-text="Mostrando..." title="Mostrar este libro en el catálogo">Mostrar</a>
+                					<?php
+                					}else{ ?>
+                						<a id="btn_hide" class="btn btn-sm btn-info pull-right" onclick="hideLibro()" data-loading-text="Ocultando..." title="Ocultar este libro del catálogo">Ocultar</a>
+                					<?php
+                					}
+								}
+                				?>
                 			</div>
                 		</div>
                 	</div>
@@ -73,11 +87,15 @@
                 
                 <div class="col-md-8 <?php if (!$LIBRO && !$NUEVO_LIBRO){ echo "hidden";} ?>">
                 	<div class="panel panel-default">
-                		<div class="panel-heading">Libro: 
+                		<div class="panel-heading text-left">Libro: 
                 			<strong>
                 			<?php
-                				if ($LIBRO) echo $LIBRO->getTitulo();
-								elseif($NUEVO_LIBRO) echo "Nuevo Libro";
+                				if ($LIBRO){
+                					echo $LIBRO->getTitulo();
+									if ($LIBRO->getOculto()) echo " (oculto)";
+                				}elseif($NUEVO_LIBRO){
+                					echo "Nuevo Libro";
+                				}
                 			?>
                 			</strong>
                 		</div>
@@ -210,19 +228,21 @@
 												url:"ajax.php",
 												type:"POST",
 												data:{
-													type: "libro",
-													action: "UPDATE",
-													libro_old_ISBN: $('#libro_form').find('#libro_old_ISBN').val(),
-													libro_ISBN: $('#libro_form').find('#libro_ISBN').val(),
-													libro_titulo: $('#libro_form').find('#libro_titulo').val(),
-													libro_idioma: $('#libro_form').find('#libro_idioma').val(),
-													libro_fecha: $('#libro_form').find('#libro_fecha').val(),
-													libro_precio: $('#libro_form').find('#libro_precio').val(),
-													libro_tags: $('#libro_form').find('#libro_tags').val(),
-													libro_texto: $('#libro_form').find('#libro_texto').val(),
-													libro_tapa: $("#img_tapa").val(),
-													libro_autor: autores_param,
-													libro_pag: $('#libro_form').find('#libro_pag').val()
+													type: "BOOK",
+													data: JSON.stringify({
+														action: "UPDATE",
+														old_ISBN: $('#libro_form').find('#libro_old_ISBN').val(),
+														ISBN: $('#libro_form').find('#libro_ISBN').val(),
+														titulo: $('#libro_form').find('#libro_titulo').val(),
+														idioma: $('#libro_form').find('#libro_idioma').val(),
+														fecha: $('#libro_form').find('#libro_fecha').val(),
+														precio: $('#libro_form').find('#libro_precio').val(),
+														tags: $('#libro_form').find('#libro_tags').val(),
+														texto: $('#libro_form').find('#libro_texto').val(),
+														tapa: $("#img_tapa").val(),
+														autores: autores_param,
+														paginas: $('#libro_form').find('#libro_pag').val()
+													})
 												},
 												success:function(data){
 													var resp = $.parseJSON(data);
@@ -231,12 +251,76 @@
 														$('#error_alert').addClass("hidden");
 														location.reload();
 													}else{
-														$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
+														$('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
 														$('#error_alert').removeClass("hidden");
 													}
 													$('#btn_save').button('reset');
 												}
 											});
+	                					}
+	                					
+	                					/** Oculta el libro del catalogo */
+	                					function hideLibro(){
+	                					    //confirm
+	                					    if (!confirm("De verdad desea ocultar este libro?")) return;
+	                					    
+	                					    $("#btn_hide").button("loading");
+	                					    $('#error_alert').text('');	$('#error_alert').addClass("hidden");
+	                						$.ajax({
+	                						    url:"ajax.php",
+	                						    type:"POST",
+	                						    data:{
+	                						        type:"BOOK",
+	                						        data: JSON.stringify({
+	                						        	action:"HIDE",
+	                						        	ISBN:$('#libro_form').find('#libro_ISBN').val()
+	                						        })
+	                						    },
+	                						    success: function(data){
+	                						    	var resp = $.parseJSON(data);
+	                						    	if (resp.ok){
+                                                        $('#error_alert').text('');
+                                                        $('#error_alert').addClass("hidden");
+                                                        location.reload();
+	                						    	}else{
+                                                        $('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
+                                                        $('#error_alert').removeClass("hidden");
+	                						    	}
+                                                    $("#btn_hide").button("reset");
+	                						    }
+	                						});
+	                					}
+	                					
+	                					/** Muestra el libro en el catalogo */
+	                					function showLibro(){
+	                					    //confirm
+	                					    if (!confirm("De verdad desea mostrar este libro?")) return;
+	                					    
+	                					    $("#btn_show").button("loading");
+	                					    $('#error_alert').text('');	$('#error_alert').addClass("hidden");
+	                						$.ajax({
+	                						    url:"ajax.php",
+	                						    type:"POST",
+	                						    data:{
+	                						        type:"BOOK",
+	                						        data: JSON.stringify({
+	                						        	action:"SHOW",
+	                						        	ISBN:$('#libro_form').find('#libro_ISBN').val()
+	                						        })
+	                						    },
+	                						    success: function(data){
+	                						    	var resp = $.parseJSON(data);
+	                						    	if (resp.ok){
+                                                        $('#error_alert').text('');
+                                                        $('#error_alert').addClass("hidden");
+                                                        location.reload();
+	                						    	}else{
+                                                        $('#error_alert').text('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
+                                                        $('#error_alert').removeClass("hidden");
+	                						    	}
+                                                    $("#btn_show").button("reset");
+	                						    }
+	                						});
 	                					}
 	                					
 	                					/** Borra el libro */
@@ -250,9 +334,11 @@
 	                						    url:"ajax.php",
 	                						    type:"POST",
 	                						    data:{
-	                						        type:"libro",
-	                						        action:"REMOVE",
-	                						        libro_ISBN:$('#libro_form').find('#libro_ISBN').val()
+	                						        type:"BOOK",
+	                						        data: JSON.stringify({
+	                						        	action:"REMOVE",
+	                						        	ISBN:$('#libro_form').find('#libro_ISBN').val()
+	                						        })
 	                						    },
 	                						    success: function(data){
 	                						    	var resp = $.parseJSON(data);
@@ -261,7 +347,7 @@
                                                         $('#error_alert').addClass("hidden");
                                                         window.location.href="admin_books.php";
 	                						    	}else{
-                                                        $('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
+                                                        $('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
                                                         $('#error_alert').removeClass("hidden");
 	                						    	}
                                                     $("#btn_delete").button("reset");
@@ -284,23 +370,25 @@
                                             autores_param = autores_param.substring(0,autores_param.length-1);
                                             
             								$('#btn_save').button('loading');
-            								$('#error_alert').text('');	$('#error_alert').addClass("hidden");
+            								$('#error_alert').html('');	$('#error_alert').addClass("hidden");
 	                						$.ajax({
 												url:"ajax.php",
 												type:"POST",
 												data:{
-													type: "libro",
-													action: "NEW",
-													libro_ISBN: $('#libro_form').find('#libro_ISBN').val(),
-													libro_titulo: $('#libro_form').find('#libro_titulo').val(),
-													libro_idioma: $('#libro_form').find('#libro_idioma').val(),
-													libro_fecha: $('#libro_form').find('#libro_fecha').val(),
-													libro_precio: $('#libro_form').find('#libro_precio').val(),
-													libro_tags: $('#libro_form').find('#libro_tags').val(),
-													libro_texto: $('#libro_form').find('#libro_texto').val(),
-													libro_autor: autores_param,
-													libro_tapa: $("#img_tapa").val(),
-													libro_pag: $('#libro_form').find('#libro_pag').val()
+													type: "BOOK",
+													data: JSON.stringify({
+														action: "CREATE",
+														ISBN: $('#libro_form').find('#libro_ISBN').val(),
+														titulo: $('#libro_form').find('#libro_titulo').val(),
+														idioma: $('#libro_form').find('#libro_idioma').val(),
+														fecha: $('#libro_form').find('#libro_fecha').val(),
+														precio: $('#libro_form').find('#libro_precio').val(),
+														tags: $('#libro_form').find('#libro_tags').val(),
+														texto: $('#libro_form').find('#libro_texto').val(),
+														autores: autores_param,
+														tapa: $("#img_tapa").val(),
+														paginas: $('#libro_form').find('#libro_pag').val()
+													})
 												},
 												success:function(data){
 													var resp = $.parseJSON(data);
@@ -310,16 +398,60 @@
 															$('#error_alert').addClass("hidden");
 															window.location.href = "admin_books.php?id="+resp.id_new;
 														}else{
-															$('#error_alert').text('Error al agregar libro\nPor favor intente nuevamente.\n');
+															$('#error_alert').html('Error al agregar libro. Por favor intente nuevamente.<br />'+resp.message);
 															$('#error_alert').removeClass("hidden");
 														}
 													}else{
-														$('#error_alert').text('Error al agregar libro\nPor favor intente nuevamente.\nResponse:\n'+resp.message);
+														$('#error_alert').html('Error al agregar libro.<br />'+resp.message+'<br />');
 														$('#error_alert').removeClass("hidden");
+														
+														if (resp.recreate){
+															var button = $(
+																'<button>',
+																{
+																	id :'btn_recreate',
+																	class: 'btn-sm btn-default',
+																	title: 'Reciclar libro eliminado',
+																	onclick: 'recreateBook()',
+																	html:'Recrear libro'
+																}
+															);
+															$('#error_alert').append('<br />El libro se encuentra eliminado, desea reactivarlo? ');
+															$('#error_alert').append(button);
+														}
 													}
 													$('#btn_save').button('reset');
 												}
 											});
+            							}
+            							
+            							/** Reactiva un libro anteriormente eliminado*/
+            							function recreateBook(){
+            								if (!confirm("De verdad desea reactivar el libro?")) return;
+	                					    
+	                					    $('#error_alert').text('');	$('#error_alert').addClass("hidden");
+	                						$.ajax({
+	                						    url:"ajax.php",
+	                						    type:"POST",
+	                						    data:{
+	                						        type:"BOOK",
+	                						        data: JSON.stringify({
+	                						        	action:"RECREATE",
+	                						        	ISBN:$('#libro_form').find('#libro_ISBN').val()
+	                						        })
+	                						    },
+	                						    success: function(data){
+	                						    	var resp = $.parseJSON(data);
+	                						    	if (resp.ok){
+                                                        $('#error_alert').text('');
+                                                        $('#error_alert').addClass("hidden");
+                                                        window.location.href="admin_books.php?id="+$('#libro_form').find('#libro_ISBN').val();
+	                						    	}else{
+                                                        $('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
+                                                        $('#error_alert').removeClass("hidden");
+	                						    	}
+	                						    }
+	                						});
             							}
 
             						<?php } ?>
@@ -328,7 +460,7 @@
                         </div><!-- fin de body -->
                         <div class="panel-footer">
                 			<div class="container-fluid">
-                				<p><div id="error_alert" class="list-group-item list-group-item-info hidden" style="float: right"></div></p>
+                				<p><div id="error_alert" class="list-group-item list-group-item-info hidden"></div></p>
 	            				<a id="btn_save" class="btn btn-sm btn-default" onclick="saveLibro()" data-loading-text="Guardando...">Guardar</a>
             				</div>
                 		</div><!-- fin de footer -->

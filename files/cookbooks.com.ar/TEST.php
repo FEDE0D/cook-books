@@ -61,16 +61,26 @@
 					}
 				});
 			}
+			
 			function testJSON(){
+				var request = {
+					action:"NAME_AVAILABLE",
+					username:"fede0d",
+					email:"federico@gmail.com.ar"
+				};
+				
 				$.ajax({
-					url:"ajax.php",
+					url:"ajax2.php",
 					type:"POST",
 					data:{
-						type: "JSON"
+						type: "USER",
+						data: JSON.stringify(request)
 					},
 					success:function(data){
+						alert(data);
+						return;
 						var result = $.parseJSON(data);
-						$("#result").text(result.result+" "+result.cant+" "+result.datos);
+						$("#result").text(result.ok);
 					}
 				});
 			}

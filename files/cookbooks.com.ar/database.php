@@ -63,21 +63,21 @@ class Conexion {
 	 */
 	
 	/** Convierte una consulta SELECT a una tabla */
-	function resultToTable($queryResult, $tableHTMLAttributes = ""){
+	function resultToTable($queryResult, $tableHTMLAttributes = "", $tableTag = true){
 		if (!$queryResult) return "";
 		$string = "";
 		$result = $queryResult->fetchAll(PDO::FETCH_NAMED);
 				
-		$string .= "<table $tableHTMLAttributes>";
+		if ($tableTag) $string .= "<table $tableHTMLAttributes>";
 		$string .= "<thead>";
-			$string .= "<tr>";
+			// $string .= "<tr>";
 				foreach ($result as $row => $column) {
 					foreach ($column as $columnName => $columnValue) {
 						$string .= "<th>$columnName</th>";
 					}
 					break;
 				}
-			$string .= "</tr>";
+			// $string .= "</tr>";
 		$string .= "</thead>";
 		
 		$string .= "<tbody>";
@@ -89,7 +89,7 @@ class Conexion {
 			$string .= "</tr>";
 		}
 		$string .= "</tbody>";
-		$string .= "</table>";
+		if ($tableTag) $string .= "</table>";
 		
 		return $string;
 	}
@@ -333,14 +333,13 @@ class Books{
 		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
 		self::$initialized = TRUE;
 	}
-	/** Retorna un array de objetos Book con todos los libros no eliminados en el sistema */
-	static function getLibros(){
+	/** Retorna un array de objetos Book con todos los libros del sistema. OJO! Devuelve todos los libros (incluyendo eliminados y ocultos) */
+	static function getBooks(){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
 			FROM libros L
 			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
-			WHERE(L.eliminado=0)
 			GROUP BY L.ISBN
 		");
 				
@@ -352,14 +351,34 @@ class Books{
 			}
 		}
 		return $libros;
-		
 	}
 	
-	/**Devuelve un objeto Book o NULL si no existe. El libro puede estar eliminado. */
+	/** Retorna todos los libros del sistema que no estan eliminados (pueden estar ocultos)*/
+	static function getBooksAvailable(){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
+			FROM libros L
+			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
+			GROUP BY L.ISBN
+			HAVING (L.eliminado=0)
+		");
+				
+		$libros = array();
+		if ($result){
+			$librosDatos = $result->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($librosDatos as $key => $info) {
+				array_push($libros, new Book($info));
+			}
+		}
+		return $libros;
+	}
+	
+	/** Devuelve un objeto Book o NULL si no existe. */
 	static function getBook($bookISBN){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
 			FROM libros L
 			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			GROUP BY L.ISBN
@@ -376,10 +395,10 @@ class Books{
 	static function getBestSellers($cantidad){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
 			FROM libros L
 			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
-			WHERE (L.eliminado=0)
+			WHERE (L.eliminado=0 AND L.hidden=0)
 			Group by L.ISBN
 			LIMIT $cantidad
 		");
@@ -400,26 +419,26 @@ class Books{
 	static function getCatalogo(){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.apellido) as autor, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.apellido) as autores, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas, L.tapa
 			FROM libros L
 			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			LEFT JOIN autor A ON (E.id_autor=A.ID)
-			WHERE (L.eliminado=0)
+			WHERE (L.eliminado=0 AND L.hidden=0)
 			Group by L.ISBN
 		");
-		return self::$conexion->resultToTable($result, 'id="bookstable" style="color: #000000"');
+		return self::$conexion->resultToTable($result, 'id="bookstable" class="display" cellspacing="0" width="100%"', false);
 	}
 	
 	/** Retorna un array con objetos Book de ese autor. Los libros NO estan eliminados */
 	static function getBooksBy($author_id){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.IDIOMA, L.paginas, L.precio, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
 			FROM autor A
 			LEFT JOIN escribe E ON (A.ID=E.id_autor)
 			INNER JOIN libros L ON (L.ISBN=E.isbn)
 			GROUP BY (L.ISBN)
-			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0)
+			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0 AND L.hidden=0)
 		");
 		$books = Array();
 		if ($result){
@@ -452,7 +471,8 @@ class Books{
 				`etiquetas`,
 				`texto`,
 				`tapa`,
-				`eliminado`
+				`eliminado`,
+				`hidden`
 				)
 			VALUES(
 				'$ISBN',
@@ -464,6 +484,7 @@ class Books{
 				'$tags',
 				'$texto',
 				'$tapa',
+				'0',
 				'0'
 			)
 		");
@@ -505,6 +526,7 @@ class Books{
 		$paginas = $libro->getPaginas();
 		$tapa = $libro->getTapa();
 		$eliminado = $libro->getEliminado();
+		$oculto = $libro->getOculto();
 	
 		$result = self::$conexion->query("
 			UPDATE  libros
@@ -517,7 +539,8 @@ class Books{
 			etiquetas = '$tags',
 			texto = '$texto',
 			tapa = '$tapa',
-			eliminado = '$eliminado'
+			eliminado = '$eliminado',
+			hidden = '$oculto'
 			WHERE (ISBN = $isbn)
 		");
 		if ($result){
@@ -564,6 +587,7 @@ class Book{
 			$texto,
 			$tapa,
 			$eliminado,
+			$oculto,
 			$autores; //es un string de id de autor separados por comas
 			
 	function __construct($param){
@@ -577,6 +601,7 @@ class Book{
 		$this->texto = $param['texto']? $param['texto']:'';
 		$this->tapa = $param['tapa']? $param['tapa']:'';
 		$this->eliminado = $param['eliminado']? $param['eliminado']:'0';
+		$this->oculto = $param['hidden']? $param['hidden']:'0';
 		$this->autores = $param['autores']? $param['autores']:'';
 	}
     
@@ -655,6 +680,10 @@ class Book{
 		return $this->eliminado;
 	}
 	
+	function getOculto(){
+		return $this->oculto;
+	}
+	
 	function setTitulo($titulo){
 		$this->titulo=$titulo;
 	}
@@ -690,6 +719,10 @@ class Book{
 	
 	function setEliminado($num){
 		$this->eliminado=$num;
+	}
+	
+	function setOculto($num){
+		$this->oculto=$num;
 	}
 	
 	/** Recibe una lista de autores separada por coma */
@@ -950,7 +983,7 @@ class Cart{
 			self::$articulos[$bookId]['cantidad'] = 1;
 			
 			//por motivos de optimización además guardo datos sobre el libro
-			include_once 'database.php';
+			// include_once 'database.php';
 			$book = Books::getBook($bookId);
 			if ($book){
 				$arrayBook = array(
@@ -1026,25 +1059,7 @@ class Cart{
 	                <a href='product.php?id=<?php echo $bookid ?>' style='text-decoration: none'>
 	                	<span class='badge pull-left'><?php echo $cantidad ?></span>&nbsp;<?php echo $book['titulo'] ?>
 	                </a>&nbsp;
-	                <button onclick="
-	                	<?php
-	                		//Javascript activado con el click, pide que se remueva el libro, al finalizar recarga el navbar.
-	                		echo (
-	                			"
-	                			var btn = $('#cartButton');
-	                			btn.button('loading');
-	                			$.post('ajax.php', {type:'cart',action:'REMOVE', bookid:'".$bookid."'}).done(
-									function(data){
-										$.post('navigation.php').done(
-											function(navbar){
-												$('#navigationWrapper').replaceWith(navbar);
-											}
-										);
-									}
-								);"
-							);
-	                	?>
-	                " class="pull-right" >
+	                <button value="<?php echo $bookid; ?>" onclick="removeBook(this)" class="pull-right" >
 	                	<span class='glyphicon glyphicon-trash'></span>
 	                </button>
                 </div>
@@ -1053,43 +1068,68 @@ class Cart{
 		}
 		?>
 			<p>Total: $<?php echo self::priceCart() ?>
-			<button onclick="
-            	<?php
-            		echo (
-            			"
-            			var btn = $('#cartButton');
-            			btn.button('loading');
-            			$.post('ajax.php', {type:'cart',action:'EMPTY'}).done(
-							function(data){
-								$.post('navigation.php').done(
-									function(navbar){
-										$('#navigationWrapper').replaceWith(navbar);
-									}
-								);
-							}
-						);"
-					);
-            	?>
-	            " class="pull-right" >
-	            	<span class='glyphicon glyphicon-trash'> Vaciar</span>
+			<button onclick="clearCart()" class="pull-right" >
+	            <span class='glyphicon glyphicon-trash'> Vaciar</span>
             </button>
 			<button class="pull-right" onclick="document.location='buy.php'">
 				<span class='glyphicon glyphicon-shopping-cart'> Comprar</span>
 			</button>
             </p>
 		</div>
+		<script>
+			/** Elimina un libro del carrito */
+			function removeBook(elem){
+				$.ajax({
+					url:'ajax.php',
+					type:'POST',
+					data:{
+						type:'CART',
+						data: JSON.stringify({
+							action:'REMOVE',
+							bookid:$(elem).val()
+						})
+					},
+					success:function(data){
+						$.post('navigation.php').done(
+							function(navbar){
+								$('#navigationWrapper').replaceWith(navbar);
+							}
+						);
+					}
+				});
+			}
+			
+			function clearCart(){
+				$.ajax({
+					url:'ajax.php',
+					type:'POST',
+					data:{
+						type:'CART',
+						data: JSON.stringify({
+							action:'CLEAR'
+						})
+					},
+					success:function(data){
+						$.post('navigation.php').done(
+							function(navbar){
+								$('#navigationWrapper').replaceWith(navbar);
+							}
+						);
+					}
+				});
+			}
+			
+		</script>
 		<?php
 	}
 	
-	/** Imprime el carrito. Solo para debug. */
+	/** Imprime el carrito. XXX Solo para debug. */
 	static function printCart(){
 		self::initialize();
 		print_r(self::$articulos);
 	}
 	
 }
-
-
 
 class Errors{
 	

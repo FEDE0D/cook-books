@@ -65,25 +65,25 @@
 													<button 
 														value="<?php echo $book->getISBN();?>"
 														data-loading-text="Espere..."
-														onclick="
+														onclick="addToCart(this)
 															<?php
 															//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
-															echo ("
-																var btn = $(this);
-																var btnCart = $('#cartButton');
-	            												btnCart.button('loading');
-																btn.button('loading');
-																$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
-																	function(data){
-																		$.post('navigation.php').done(
-																			function(navbar){
-																				$('#navigationWrapper').replaceWith(navbar);
-																				btn.button('reset');
-																			}
-																		);
-																	}
-																);"
-															);
+															// echo ("
+																// var btn = $(this);
+																// var btnCart = $('#cartButton');
+	            												// btnCart.button('loading');
+																// btn.button('loading');
+																// $.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
+																	// function(data){
+																		// $.post('navigation.php').done(
+																			// function(navbar){
+																				// $('#navigationWrapper').replaceWith(navbar);
+																				// btn.button('reset');
+																			// }
+																		// );
+																	// }
+																// );"
+															// );
 															?>
 														">Comprar
 													</button>
@@ -107,6 +107,34 @@
             </div>
         </div>
         <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
+        <script>
+        	/** Peticion de agregar un libro al carrito, al finalizar recarga el navbar*/
+        	function addToCart(elem){
+        		$(elem).button('loading');
+        		$('#cartButton').button('loading');
+        		$.ajax({
+        			url:'ajax.php',
+        			type:'POST',
+        			data:{
+        				type:'CART',
+        				data:JSON.stringify({
+        					action:'ADD',
+        					bookid:$(elem).val()
+        				})
+        			},
+        			success:function(data){
+        				$.post('navigation.php').done(
+        					function(navbar){
+        						$('#navigationWrapper').replaceWith(navbar);
+        					}
+        				);
+        				$(elem).button('reset');
+        			}
+        		});
+        	}
+        	
+        	/**  */
+        </script>
         <style>
         	body{
         		background-image: url('website/img/779730.png');

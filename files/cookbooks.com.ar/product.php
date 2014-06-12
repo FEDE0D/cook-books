@@ -69,42 +69,46 @@
 						  <div class="panel-body" align="center">
 						    <img src="books/img/tapas/<?php echo $book->getTapa() ?>" class="img-rounded img-responsive" style=" height: 80px;">
 						    <?php
-											if ($user = Users::getUserLogin()){
-												if (!$user->getIsAdministrator()){
-												?>
-													<button 
-														value="<?php echo $book->getISBN();?>"
-														data-loading-text="Espere..."
-														onclick="
-															<?php
-															//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
-															echo ("
-																var btn = $(this);
-																var btnCart = $('#cartButton');
-	            												btnCart.button('loading');
-																btn.button('loading');
-																$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
-																	function(data){
-																		$.post('navigation.php').done(
-																			function(navbar){
-																				$('#navigationWrapper').replaceWith(navbar);
-																				btn.button('reset');
-																			}
-																		);
-																	}
-																);"
-															);
-															?>
-														">Comprar
-													</button>
-												<?php 
-												}
-											}else {
-												
-												
-												
-											}
-											?>
+								if ($user = Users::getUserLogin()){
+									if (!$user->getIsAdministrator()){
+									?>
+										<button 
+											value="<?php echo $book->getISBN();?>"
+											data-loading-text="Espere..."
+											onclick="addToCart(this)">Comprar
+										</button>
+										<script>
+											/** Peticion de agregar un libro al carrito, al finalizar recarga el navbar*/
+								        	function addToCart(elem){
+								        		$(elem).button('loading');
+								        		$('#cartButton').button('loading');
+								        		$.ajax({
+								        			url:'ajax.php',
+								        			type:'POST',
+								        			data:{
+								        				type:'CART',
+								        				data:JSON.stringify({
+								        					action:'ADD',
+								        					bookid:$(elem).val()
+								        				})
+								        			},
+								        			success:function(data){
+								        				$.post('navigation.php').done(
+								        					function(navbar){
+								        						$('#navigationWrapper').replaceWith(navbar);
+								        					}
+								        				);
+								        				$(elem).button('reset');
+								        			}
+								        		});
+								        	}
+										</script>
+									<?php 
+									}
+								}else {
+									
+								}
+								?>
 							
                 		</div>
               			<?php } ?>

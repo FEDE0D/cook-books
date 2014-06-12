@@ -109,13 +109,15 @@
 													url:"ajax.php",
 													type:"POST",
 													data:{
-														type: "author",
-														action: "UPDATE",
-														auth_id: $('#author_form').find('#auth_ID').val(),
-														auth_nombre: $('#author_form').find('#auth_name').val(),
-														auth_apellido: $('#author_form').find('#auth_lastname').val(),
-														auth_fecha_n: $('#author_form').find('#auth_birthdate').val(),
-														auth_lugar_n: $('#author_form').find('#auth_birthplace').val()
+														type: "AUTHOR",
+														data:JSON.stringify({
+															action: "UPDATE",
+															id: $('#author_form').find('#auth_ID').val(),
+															nombre: $('#author_form').find('#auth_name').val(),
+															apellido: $('#author_form').find('#auth_lastname').val(),
+															fecha_n: $('#author_form').find('#auth_birthdate').val(),
+															lugar_n: $('#author_form').find('#auth_birthplace').val()
+														})
 													},
 													success:function(data){
 														var resp = $.parseJSON(data);
@@ -125,7 +127,7 @@
 															$('#error_alert').addClass("hidden");
 															location.reload();
 														}else{
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+resp.message);
+															$('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
 															$('#error_alert').removeClass("hidden");
 														}
 														$('#btn_save').button('reset');
@@ -140,15 +142,18 @@
 		                					
 		                					/** Borra el autor */
 		                					function deleteAuthor(){
+		                						if (!confirm("De verdad desea eliminar este autor?")) return;
 		                						$('#btn_delete').button('loading');
 		                						$('#error_alert').text(''); $('#error_alert').addClass("hidden");
 		                						$.ajax({
 		                							url:"ajax.php",
 		                							type:"POST",
 		                							data:{
-		                								type:"author",
-		                								action:"REMOVE",
-		                								auth_id:"<?php echo $AUTOR->getID(); ?>"
+		                								type:"AUTHOR",
+		                								data:JSON.stringify({
+		                									action: "REMOVE",
+		                									id:"<?php echo $AUTOR->getID(); ?>"
+		                								})
 		                							},
 		                							success:function(data){
 		                								var resp = $.parseJSON(data);
@@ -156,7 +161,7 @@
 		                									alert("El autor fue eliminado correctamente!");
 		                									window.location.href = "admin_authors.php";
 		                								}else{
-		                									$('#error_alert').text('Error al eliminar autor\nPor favor intente nuevamente.\n'+resp.message);
+		                									$('#error_alert').html('Error al eliminar autor. Por favor intente nuevamente.<br />'+resp.message);
 															$('#error_alert').removeClass("hidden");
 		                								}
 		                								$('#btn_delete').button('reset');
@@ -170,17 +175,20 @@
                 								if (!validateAutor()) return;
                 								$('#btn_save').button('loading');
                 								$('#error_alert').text(''); $('#error_alert').addClass("hidden");
+                								
 		                						$.ajax({
 													url:"ajax.php",
 													type:"POST",
 													data:{
-														type: "author",
-														action: "NEW",
-														auth_id: "",
-														auth_nombre: $('#author_form').find('#auth_name').val(),
-														auth_apellido: $('#author_form').find('#auth_lastname').val(),
-														auth_fecha_n: $('#author_form').find('#auth_birthdate').val(),
-														auth_lugar_n: $('#author_form').find('#auth_birthplace').val()
+														type: "AUTHOR",
+														data: JSON.stringify({
+															action: "CREATE",
+															id: "",
+															nombre: $('#author_form').find('#auth_name').val(),
+															apellido: $('#author_form').find('#auth_lastname').val(),
+															fecha_n: $('#author_form').find('#auth_birthdate').val(),
+															lugar_n: $('#author_form').find('#auth_birthplace').val()
+														})
 													},
 													success:function(data){
 														var resp = $.parseJSON(data);
@@ -190,11 +198,11 @@
 																$('#error_alert').addClass("hidden");
 																window.location.href = "admin_authors.php?id="+resp.id_new;
 															}else{
-																$('#error_alert').text('Error al agregar el nuevo autor\nPor favor intente nuevamente.\n'+resp.message);
+																$('#error_alert').html('Error al agregar el nuevo autor. Por favor intente nuevamente.<br />'+resp.message);
 																$('#error_alert').removeClass("hidden");
 															}
 														}else{
-															$('#error_alert').text('Error al guardar los cambios\nPor favor intente nuevamente.\n'+resp.message);
+															$('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
 															$('#error_alert').removeClass("hidden");
 														}
 														$('#btn_save').button('reset');
@@ -245,7 +253,7 @@
         </script>
         <style type="text/css">
         	body{
-        		background-image: url('website/img/556058.png');
+        		background-image: url('website/img/1656182.png');
         	}
         </style>
     </body>
