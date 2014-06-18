@@ -39,13 +39,15 @@
 						</div>
 				 	</div>
 				</div>
-				<p>TODO: Dar formato a la tabla</p>
-				<ul>*Mostrar solo fecha, precio, autor y titulo <br>
-					*Hacer que la fila sea un link al libro<br>
-					*Cambiar campos del header<br>
-					*Testear los diferentes filtros (SRS)<br>
-					*Transformar catalogo a una Clase<br />
-				</ul>
+				<div class="hidden">
+					<p>TODO: Dar formato a la tabla</p>
+					<ul>*Mostrar solo fecha, precio, autor y titulo <br>
+						*Hacer que la fila sea un link al libro<br>
+						*Cambiar campos del header<br>
+						*Testear los diferentes filtros (SRS)<br>
+						*Transformar catalogo a una Clase<br />
+					</ul>
+				</div>
 			</div>
 			<div class="col-md-10">
 				<div class="row">
@@ -59,7 +61,7 @@
 							?>
 						</h3>
 						<br />
-						<table id="book_table" class="table table-striped table-bordered" cellspacing="0" width="100%" style="background-color:#E3E3E3">
+						<table id="book_table" class="table table-striped table-bordered " width="100%" style="background-color:#EEEEEE;">
 							<?php echo Books::getCatalogo(); ?>
 						</table>		
 					</div>
@@ -69,7 +71,86 @@
 	</div>
 	<script>
 		$(document).ready(function(){
-			$("#book_table").dataTable();
+			$("#book_table").dataTable({
+				"language": {
+					"url": "website/datatables1.10.0/lang/Spanish.json"
+				},
+				"columnDefs": [
+					{
+						"targets": [0],
+						"title": "ISBN",
+						"visible": false,
+						"searchable": false
+					},
+					{
+						"targets": [1],
+						"title": "Titulo",
+						"visible": true,
+						"searchable": true
+					},
+					{
+						"targets": [2],
+						"title": "Autores",
+						"visible": true,
+						"searchable": true,
+						"render":function(data,type,row){
+							return ""+data;
+						}
+					},
+					{
+						"targets": [3],
+						"title": "Cant. Paginas",
+						"visible": false,
+						"searchable": false
+					},
+					{
+						"targets": [4],
+						"title": "Precio",
+						"visible": true,
+						"searchable": true,
+						"render":function(data,type,row){
+							return '$'+data;
+						},
+						"class":"text-center"
+					},
+					{
+						"targets": [5],
+						"title": "Idioma",
+						"visible": true,
+						"searchable": true,
+						"class":"text-center"
+					},
+					{
+						"targets": [6],
+						"title": "Año",
+						"visible": true,
+						"searchable": true,
+						"type":"date",
+						"render":function(data,type,row){
+							var date = new Date(data);
+							return date.getFullYear();
+						},
+						"class":"text-center"
+					},
+					{
+						"targets": [7],
+						"title": "Tags",
+						"visible": false,
+						"searchable": true
+					},
+					{
+						"targets": [8],
+						"title": "Ver más",
+						"visible": true,
+						"searchable": true,
+						"sortable":false,
+						"render":function(data,type,row){
+							return "<a href='product.php?id="+row[0]+"'><img src='books/img/tapas/"+data+"' style='height:50px;'></img></a>";
+						},
+						"class":"text-center"
+					}
+				]
+			});
     	}); 
 	</script>
 	<style type="text/css">

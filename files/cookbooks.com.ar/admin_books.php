@@ -36,11 +36,7 @@
 	    		$LIBRO = Books::getBook($ID_ACTIVE);
 	    	}
 	    ?>
-        <div class="container-fluid text-center">
-        	<div class="alert alert-danger">
-	        	FALTA IMPLEMENTAR!:<br />
-	        	cambiar ISBN a un libro, checkear si ya existe ese ISBN
-        	</div> 
+        <div class="container-fluid text-center"> 
             <div class="row">
                 <div class="col-md-4">
                 	<div class="panel panel-default">
@@ -179,11 +175,8 @@
                     				<img id="img_tapa" src="books/img/tapas/<?php
                     					$path = "_DEFAULT_.jpg";
 										if ($LIBRO){
-											if (is_file("books/img/tapas/".$LIBRO->getTapa())){
-												$path = $LIBRO->getTapa();
-											}
-										} 
-										echo $path;
+											echo $LIBRO->getTapa();
+										}
                     					?>" class="img-rounded img-responsive pull-left" style="height: 100px; padding:10px;">
 									</table>
 										
@@ -249,7 +242,11 @@
 													if (resp.ok){
 														$('#error_alert').text('');
 														$('#error_alert').addClass("hidden");
-														location.reload();
+														if (resp.id_new){
+															window.location.href = "admin_books.php?id="+resp.id_new;
+														}else{
+															location.reload();
+														}
 													}else{
 														$('#error_alert').html('Error al guardar los cambios. Por favor intente nuevamente.<br />'+resp.message);
 														$('#error_alert').removeClass("hidden");

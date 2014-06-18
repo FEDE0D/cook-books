@@ -237,8 +237,8 @@ class BookRequest extends Request{
 	}
 	
 	function UPDATE(){
+		$libro = Books::getBook($this->ISBN);
 		if ($this->old_ISBN==$this->ISBN){
-			$libro = Books::getBook($this->ISBN);
 			if ($libro){
 				$libro->setTitulo($this->titulo);
 				$libro->setAutores($this->autores);
@@ -260,9 +260,36 @@ class BookRequest extends Request{
 				$this->response->setProperty("ok", FALSE);
 				$this->response->setProperty("message", "Error no existe el libro con ISBN $this->ISBN.");
 			}
-		}else{//TODO: Se modifico el ISBN del libro, Hacer una BAJA y una ALTA del libro
-			$this->response->setProperty("ok", FALSE);
-			$this->response->setProperty("message", "Falta implementar!");
+		}else{
+			if (!$libro){//Si no existe un libro con el ISBN nuevo, puedo modificar el libro y cambiar el ISBN por el nuevo
+				$libro = Books::getBook($this->old_ISBN);
+				if ($libro){
+					$libro->setISBN($this->ISBN);
+					$libro->setTitulo($this->titulo);
+					$libro->setAutores($this->autores);
+					$libro->setEtiquetas($this->tags);
+					$libro->setIdioma($this->idioma);
+					$libro->setPrecio($this->precio);
+					$libro->setPaginas($this->paginas);
+					$libro->setTapa($this->tapa);
+					$libro->setTexto($this->texto);
+					$libro->setFecha($this->fecha);
+					
+					if ($libro->save()){
+						$this->response->setProperty("ok", TRUE);
+						$this->response->setProperty("id_new", $this->ISBN);
+					}else{
+						$this->response->setProperty("ok", FALSE);
+						$this->response->setProperty("message", "Error al actualizar la información del libro.");
+					}
+				}else{
+					$this->response->setProperty("ok", FALSE);
+					$this->response->setProperty("message", "Error al modificar los datos del libro.");
+				}
+			}else{
+				$this->response->setProperty("ok", FALSE);
+				$this->response->setProperty("message", "Error: ya existe un libro con el mismo ISBN $this->ISBN.");
+			}
 		}
 	}
 

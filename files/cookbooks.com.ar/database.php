@@ -515,6 +515,7 @@ class Books{
 	public static function updateBook(Book $libro){
 		self::initialize();
 		
+		$old_isbn = $libro->getOLD_ISBN();
 		$isbn = $libro->getISBN();
 		$titulo = $libro->getTitulo();
 		$idioma = $libro->getIdioma();
@@ -531,6 +532,7 @@ class Books{
 		$result = self::$conexion->query("
 			UPDATE  libros
 			SET
+			ISBN = '$isbn',
 			titulo = '$titulo',
 			IDIOMA = '$idioma',
 			paginas = '$paginas',
@@ -541,13 +543,13 @@ class Books{
 			tapa = '$tapa',
 			eliminado = '$eliminado',
 			hidden = '$oculto'
-			WHERE (ISBN = $isbn)
+			WHERE (ISBN = $old_isbn)
 		");
 		if ($result){
 			//	Baja de las conexiones de autores de este libro en tabla Escritos
 			$result2 = self::$conexion->query("
 				DELETE FROM escribe
-				WHERE (isbn=$isbn)
+				WHERE (isbn=$old_isbn)
 			");
 			if ($result2){
 				//	Dar de alta las conexiones de autores de este libro en tabla Escritos
@@ -568,7 +570,7 @@ class Books{
 			}
 			return TRUE;
 		}
-		return FALSE;
+		return self::$conexion->getLastError();
 	}
 	
 	
@@ -577,7 +579,7 @@ class Books{
 
 class Book{
 	
-	private	$ISBN,//no se puede modificar, si se quiere cambiar, se debe realizar una baja y alta
+	private	$ISBN, $OLD_ISBN,
 			$titulo,
 			$paginas,
 			$precio,
@@ -592,6 +594,7 @@ class Book{
 			
 	function __construct($param){
 		$this->ISBN = $param['ISBN'];
+		$this->OLD_ISBN = $param['ISBN'];
 		$this->titulo = $param['titulo']? $param['titulo']:'';
 		$this->paginas = $param['paginas']? $param['paginas']:'0';
 		$this->precio = $param['precio']? $param['precio']:'0';
@@ -607,6 +610,10 @@ class Book{
     
 	function getISBN(){
 		return $this->ISBN;
+	}
+	
+	function getOLD_ISBN(){
+		return $this->OLD_ISBN;
 	}
 	
 	function getTitulo(){
@@ -672,8 +679,19 @@ class Book{
 		return $this->texto;
 	}
 	
-	function getTapa(){
-		return $this->tapa;
+	/** Recibe TRUE si se quiere obtener el valor real guardado en la tapa.
+	 * FALSE si se quiere obtener un valor por defecto en caso de que no exista el archivo de tapa. */
+	function getTapa($crudo = false){
+		if ($crudo){
+			return $this->tapa;
+		}else{
+			if(is_file("books/img/tapas/".$this->tapa)){
+				return $this->tapa;
+			}else{
+				return "_DEFAULT_.jpg";
+			}
+		}
+			
 	}
 	
 	function getEliminado(){
@@ -682,6 +700,11 @@ class Book{
 	
 	function getOculto(){
 		return $this->oculto;
+	}
+	
+	function setISBN($ISBN){
+		$this->OLD_ISBN = $this->ISBN;
+		$this->ISBN = $ISBN;
 	}
 	
 	function setTitulo($titulo){
