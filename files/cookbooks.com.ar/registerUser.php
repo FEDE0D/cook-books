@@ -26,25 +26,24 @@
 						Users::saveLogin($newUser);
 						header( 'Location: ./' ) ;
 					}else{
-						echo "<p>Error: al crear el usuario.</p>";
-						//header('Refresh: 2; URL=register.php');
+						Errors::error("Error de registro", "Error: al crear el usuario.");
 					}
 					
 				}else{
-					echo "<p>Error: las contraseñas no coinciden</p>";
+					Errors::error("Error de registro", "Error: las contraseñas no coinciden");
 					header('Refresh: 2; URL=register.php');
 				}
 			}else{
-				echo "<p>Error: el email '$email' ya está registrado</p>";
+				Errors::error("Error de registro", "Error: el email '$email' ya está registrado");
 				header('Refresh: 2; URL=register.php');
 			}
 		}else{
-			echo "<p>Error: el nombre de usuario '$username' ya está registrado</p>";
+			Errors::error("Error de registro", "Error: el nombre de usuario '$username' ya está registrado");
 			header('Refresh: 2; URL=register.php');
 		}
 		
     }else{
-    	echo "<p>Error: faltan parámetros o son erroneos</p>";
+    	Errors::error("Error de registro", "Error: faltan parámetros o son erroneos");
 		header('Refresh: 2; URL=register.php');
     }
     

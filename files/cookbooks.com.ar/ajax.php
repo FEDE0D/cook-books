@@ -79,21 +79,30 @@ class UserRequest extends Request{
 		parent::__construct($data);
 	}
 
+	function NOT_EXISTS(){
+		$result = Users::userExists($this->username);
+		if($result){
+			$this->response->setJSON("false");//JQuery Validator solo admite true/false
+		}else{
+			$this->response->setJSON("true");
+		}
+	}
+
 	function EXISTS(){
 		$result = Users::userExists($this->username);
-		if ($result){
-			$this->response->setProperty("ok", TRUE);
+		if($result){
+			$this->response->setJSON("true");
 		}else{
-			$this->response->setProperty("ok", FALSE);
+			$this->response->setJSON("false");
 		}
 	}
 	
 	function EMAIL_AVAILABLE(){
 		$result = Users::emailExists($this->email);
 		if ($result){
-			$this->response->setProperty("ok", TRUE);
+			$this->response->setJSON("false");
 		}else{
-			$this->response->setProperty("ok", FALSE);
+			$this->response->setJSON("true");
 		}
 	}
 			
@@ -391,7 +400,7 @@ class JSONResponse{
 	}
 	
 	function setJSON($json_data){
-		$this->data = json_decode($json,TRUE);
+		$this->data = json_decode($json_data,TRUE);
 	}
 	
 }

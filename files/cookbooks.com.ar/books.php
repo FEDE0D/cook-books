@@ -21,8 +21,8 @@
 	<?php include_once('navigation.php')?>
 	<div class="container-fluid">
 		<div class="row">
-			<div class="col-md-2">
-				<div class="panel panel-default">
+			<div class="col-md-0">
+				<div class="panel panel-default hidden">
 					<div class="panel-heading">
 							<h3 class="panel-title">Ver libros</h3>
 					</div>
@@ -49,7 +49,7 @@
 					</ul>
 				</div>
 			</div>
-			<div class="col-md-10">
+			<div class="col-md-12">
 				<div class="row">
 					<div class="container-fluid">
 						<h3>
@@ -70,8 +70,20 @@
 		</div>
 	</div>
 	<script>
+	
+		function getParameterByName(name) {
+		    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+		    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		        results = regex.exec(location.search);
+		    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+			
 		$(document).ready(function(){
-			$("#book_table").dataTable({
+			$("#book_table").on('init.dt', function () {
+				var q = getParameterByName("query");
+				$("#book_table_filter").find("input").val(q);
+				//TODO: Que esto se haga automaticamente
+			}).dataTable({
 				"language": {
 					"url": "website/datatables1.10.0/lang/Spanish.json"
 				},
@@ -86,7 +98,10 @@
 						"targets": [1],
 						"title": "Titulo",
 						"visible": true,
-						"searchable": true
+						"searchable": true,
+						"render":function(data,type,row){
+							return "<a href='product.php?id="+row[0]+"' style='text-decoration:none; margin-left:10px' >"+data+"</a>";
+						}
 					},
 					{
 						"targets": [2],
@@ -151,7 +166,9 @@
 					}
 				]
 			});
-    	}); 
+				
+    	});
+		
 	</script>
 	<style type="text/css">
     	body{

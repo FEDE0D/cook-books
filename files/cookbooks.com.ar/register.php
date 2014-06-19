@@ -73,22 +73,34 @@
                 							username:{
 												required: true,
 								                minlength: 3,
-								                remote: {
-									                url: "ajax.php",
-									                data:{
-									                	type: 'user',
-									                	action: 'NAME_AVAILABLE'
-									                }
+								                remote: function(){
+								                	var r = {
+												                url: "ajax.php",
+												                data:{
+												                	type: 'USER',
+												                	data: JSON.stringify({
+												                		action: 'NOT_EXISTS',
+												                		username: $('#registerForm').find('#username').val()
+												                	})
+												                }
+											                }
+													return r;
 								                }
 											},
 											email:{
 												required: true,
-												remote: {
-													url: "ajax.php",
-													data:{
-														type:'user',
-														action:'EMAIL_AVAILABLE'
+												remote: function(){
+													var r = {
+														url: "ajax.php",
+														data:{
+															type:'USER',
+															data: JSON.stringify({
+																action:'EMAIL_AVAILABLE',
+																email: $('#registerForm').find('#email').val()
+															})
+														}
 													}
+													return r;
 												}
 											},
 										    password1: "required",
@@ -126,7 +138,5 @@
         <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>
-        <script src="datatables/js/jquery.dataTables.js"></script>
-        <script src="scripts.js"></script>
     </body>
 </html>

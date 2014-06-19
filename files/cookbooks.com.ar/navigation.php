@@ -27,7 +27,7 @@
 				</ul>
 			</div>
 			<div class="">
-				<form class="navbar-form navbar-left" action="search.php" method="get" role="search">
+				<form class="navbar-form navbar-left" action="books.php" method="get" role="search">
 					<div class="form-group" style="padding-top: 2px; padding-bottom: 0px;">
 						<input type="text" name="query" class=" form-control" placeholder="Buscar un libro..." >
 						<button type="submit" class="btn btn-info form-control" style="margin-left: -2px;" ><span class="glyphicon glyphicon-search"></span> </button>
