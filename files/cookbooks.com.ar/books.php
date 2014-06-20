@@ -1,3 +1,4 @@
+<?php include_once('database.php') ?>
 <!DOCTYPE html>
 <html lang="es">
   <head>  
@@ -15,7 +16,6 @@
 	<script src="website/datatables1.10.0/js/jquery.dataTables.min.js"></script>
 	<script src="website/datatables1.10.0/js/dataTables.bootstrap.js"></script>
 	<!-- <link href="website/datatables1.10.0/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" /> -->
-    <?php include_once('database.php') ?>
   </head>
   <body>
 	<?php include_once('navigation.php')?>
@@ -157,7 +157,7 @@
 						"targets": [8],
 						"title": "Ver más",
 						"visible": true,
-						"searchable": true,
+						"searchable": false,
 						"sortable":false,
 						"render":function(data,type,row){
 							return "<a href='product.php?id="+row[0]+"'><img src='books/img/tapas/"+data+"' style='height:50px;'></img></a>";

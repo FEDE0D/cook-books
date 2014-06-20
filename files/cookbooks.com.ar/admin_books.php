@@ -15,7 +15,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
         <script src="website/jquery-1.11.0.js"></script>
-         <?php include_once('database.php'); ?>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		
 		<!-- Carga de imagenes -->

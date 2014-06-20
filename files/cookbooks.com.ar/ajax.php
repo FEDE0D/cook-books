@@ -3,7 +3,9 @@
 	/**
 	 * REQUESTS:
 	 * 	type:	USER
-	 * 				action:	EXISTS
+	 * 				action:	ENABLE
+	 * 						DISABLE
+	 * 						EXISTS
 	 * 						EMAL_AVAILABLE
 	 * 			AUTHOR
 	 * 				action:	CREATE
@@ -77,6 +79,38 @@ class UserRequest extends Request{
 	
 	public function __construct($data){
 		parent::__construct($data);
+	}
+
+	public function ENABLE(){
+		$user = Users::getUser($this->username);
+		if ($user){
+			$user->setEnabled(1);
+			if ($user->save()){
+				$this->response->setProperty("ok", TRUE);
+			}else{
+				$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "No se pudo actualizar la informacion del usuario");
+			}
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "El usuario $this->username no existe");
+		}
+	}
+	
+	public function DISABLE(){
+		$user = Users::getUser($this->username);
+		if ($user){
+			$user->setEnabled(0);
+			if ($user->save()){
+				$this->response->setProperty("ok", TRUE);
+			}else{
+				$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "No se pudo actualizar la informacion del usuario");
+			}
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "El usuario $this->username no existe");
+		}
 	}
 
 	function NOT_EXISTS(){

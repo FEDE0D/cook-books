@@ -1,3 +1,4 @@
+<?php include_once('database.php'); ?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -6,7 +7,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
         <script src="http://code.jquery.com/jquery-1.11.0.js"></script>
-        <?php include_once('database.php'); ?>
     </head>
     <body>
         <?php include_once('navigation.php'); ?>

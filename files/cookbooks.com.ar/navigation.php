@@ -1,8 +1,4 @@
-<?php
-	
-	include_once('database.php');
-	
-?>
+<?php include_once('database.php'); ?>
 <div id ="navigationWrapper">
 	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  <div class="container-fluid">
@@ -58,7 +54,7 @@
 				                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>&nbsp;<?php echo $user->getUsername(); ?>&nbsp;<b class="caret"></b></a>
 				                <ul class="dropdown-menu">
 				                	<?php if ($user->getIsAdministrator()){ ?>
-				                		<li><a href="#"><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Administrar usuarios</a></li>
+				                		<li><a href="admin_users.php"><span class="glyphicon glyphicon-user"></span>&nbsp;&nbsp;&nbsp;Administrar usuarios</a></li>
 				                		<li class="divider"></li>
 				                		<li><a href="admin_books.php"><span class="glyphicon glyphicon-book"></span>&nbsp;&nbsp;&nbsp;Administrar libros</a></li>
 				                		<li class="divider"></li>

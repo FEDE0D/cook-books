@@ -140,6 +140,40 @@ class Users{
 		self::$initialized = TRUE;
 	}
 	
+	/** Retorna un objeto User correspondiente con el $username*/
+	static function getUser($username){
+		self::initialize();
+		$query = self::$conexion->query("
+			SELECT U.username, U.password, U.nombre, U.apellido, U.direccion, U.mail, U.telefono, U.admin, U.fecha_alta, U.fecha_nac, U.enabled
+			FROM usuarios U
+			WHERE (U.username = '$username')
+		");
+		if ($query){
+			$query = $query->fetch(PDO::FETCH_ASSOC);
+			return new User($query);
+		}
+		return NULL;
+	}
+	
+	/** Retorna un array de objetos User con todos los usuarios del sistema*/
+	static function getUsers(){
+		self::initialize();
+		$result = self::$conexion->query("
+			SELECT U.username, U.password, U.nombre, U.apellido, U.direccion, U.mail, U.telefono, U.admin, U.fecha_alta, U.fecha_nac, U.enabled
+			FROM usuarios U
+			WHERE (U.admin=0)
+			ORDER BY U.username
+		");
+		$usuarios = array();
+		if ($result){
+			$result = $result->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($result as $key => $value) {
+				array_push($usuarios, new User($value));
+			}
+		}
+		return $usuarios;
+	}
+	
 	/** Retorna la tabla de los usuarios completa */
 	static function tableUsers(){
 		self::initialize();
@@ -191,10 +225,11 @@ class Users{
 			`telefono` ,
 			`admin` ,
 			`fecha_alta` ,
-			`fecha_nac`
+			`fecha_nac`,
+			`enabled`
 			)
 			VALUES (
-			'$username',  '$password',  '', '' , '' ,  '$email', '' ,  '0',  '$today', ''
+			'$username',  '$password',  '', '' , '' ,  '$email', '' ,  '0',  '$today', '0000-00-00','1'
 			);
 		";
 		$result = self::$conexion->insert($query);
@@ -204,6 +239,29 @@ class Users{
 				return self::userExists2($username, $password);
 			}else return NULL;
 		}else return NULL;
+	}
+	
+	/** Guarda la info del $user en la BBDD */
+	static function updateUser(User $user){
+		self::initialize();
+		$query = self::$conexion->query("
+			UPDATE usuarios
+			SET
+			password = '".$user->getPassword()."',
+			nombre = '".$user->getNombre()."',
+			apellido = '".$user->getApellido()."',
+			direccion = '".$user->getDireccion()."',
+			mail = '".$user->getEmail()."',
+			telefono = '".$user->getTelefono()."',
+			fecha_nac = '".$user->getFechaNacimiento()."',
+			enabled = '".$user->getEnabled()."'
+			WHERE (username='".$user->getUsername()."')
+		");
+		if ($query){
+			return TRUE;
+		}else{
+			return FALSE;
+		}
 	}
 	
 	/**Retorna un objeto Usuario si existe un usuario logueado, NULL en caso contrario*/
@@ -249,7 +307,8 @@ class User{
 			$telefono,
 			$fecha_nacimiento,
 			$fecha_alta,
-			$administrator;
+			$administrator,
+			$enabled;
 			
 	function __construct($params){
 		$this->username = $params['username'];
@@ -262,6 +321,7 @@ class User{
 		$this->fecha_nacimiento = $params['fecha_nac'];
 		$this->fecha_alta = $params['fecha_alta'];
 		$this->administrator = $params['admin'];
+		$this->enabled = $params['enabled'];
 	}
 	
 	/** Solo para DEBUG */
@@ -316,6 +376,46 @@ class User{
 	
 	function getIsAdministrator(){
 		return $this->administrator;
+	}
+	
+	function getEnabled(){
+		return $this->enabled;
+	}
+	
+	function setPassword($newPassword){
+		$this->password = $newPassword;
+	}
+	
+	function setNombre($newNombre){
+		$this->nombre = $newNombre;
+	}
+	
+	function setApellido($newApellido){
+		$this->apellido = $newApellido;
+	}
+	
+	function setDireccion($newDireccion){
+		$this->direccion = $newDireccion;
+	}
+	
+	function setEmail($newEmail){
+		$this->email = $newEmail;
+	}
+	
+	function setTelefono($newTelefono){
+		$this->telefono = $newTelefono;
+	}
+	
+	function setFechaNacimiento($newFechaNacimiento){
+		$this->fecha_nacimiento = $newFechaNacimiento;
+	}
+	
+	function setEnabled($num){
+		$this->enabled = $num;
+	}
+	
+	function save(){
+		return Users::updateUser($this);
 	}
 	
 }
@@ -976,6 +1076,200 @@ class Author{
 	
 	function setEliminado($num){
 		$this->eliminado = $num;
+	}
+	
+}
+
+class Compras{
+	
+	static private $initialized = FALSE;
+	static private $conexion;
+	
+	/** Constructor */
+	private function __construct(){}
+	
+	private static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
+		self::$initialized = TRUE;
+	}
+	
+	/** Retorna un array de objetos Compra con todas las compras del sistema */
+	static function getCompras(){
+		self::initialize();
+		$data = self::$conexion->query("
+			SELECT *
+			FROM compra C
+		");
+		$compras = array();
+		if ($data){
+			$data = $data->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				array_push($compras, new Compra($value));
+			}
+		}
+		return $compras;
+	}
+	
+	/** Guarda los cambios del objeto Compra en la base de datos */
+	static function updateCompra(Compra $compra){
+		self::initialize();
+		$data = self::$conexion->query("
+			UPDATE compra
+			SET estado = '$compra->getEstado()'
+		");
+		if ($data){
+			return TRUE;
+		}else{
+			return FALSE;
+		}
+	} 
+	
+}
+
+class Compra{
+	
+	private $id,
+			$fecha,
+			$estado,
+			$username;
+			
+	private $pedidos;
+	
+	function __construct($data){
+		$this->id = $data['id'];
+		$this->fecha = $data['fecha'];
+		$this->estado = $data['estado'];
+		$this->username = $data['username'];
+		$this->pedidos = FALSE;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	
+	function getFecha(){
+		return $this->fecha;
+	}
+	
+	function getEstado(){
+		return $this->estado;
+	}
+	
+	function getUsername(){
+		return $this->username;
+	}
+	
+	/** Retorna un array de Pedido */
+	function getPedidos(){
+		if (!$this->pedidos){
+			$this->pedidos = Pedidos::getPedidos($this->id);
+		}
+		return $this->pedidos;
+	}
+	
+	/** retorna el precio total para esta compra */
+	function getTotal(){
+		$pedidos = $this->getPedidos();
+		$total = 0;
+		foreach ($pedidos as $key => $value) {
+			$total += $value->getSubtotal();
+		}
+		return $total;
+	}
+	
+	function setEstado($newEstado){
+		$this->estado = $newEstado;
+	}
+	
+	/** Retorna TRUE/FALSE si pudo actualizar la compra */
+	function save(){
+		return Compras::updateCompra($this);
+	}
+	
+}
+
+class Pedidos{
+	
+	static private $initialized = FALSE;
+	static private $conexion;
+	
+	/** Constructor */
+	private function __construct(){}
+	
+	private static function initialize(){
+		if (self::$initialized) return;
+		self::$conexion = new Conexion;
+		if (!self::$conexion->conectar())	Errors::error("No se puede conectar a la base de datos", "Error al conectar a la base de datos!");
+		self::$initialized = TRUE;
+	}
+	
+	/** Retorna un array de Pedido para una compra con id $idCompra */
+	static function getPedidos($idCompra){
+		self::initialize();
+		$data = self::$conexion->query("
+			SELECT *
+			FROM pedidos P
+			WHERE (P.id_compra='$idCompra')
+		");
+		$pedidos = array();
+		if ($data){
+			$data = $data->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				array_push($pedidos, new Pedido($value));
+			}
+		}
+		return $pedidos;
+	}
+	
+}
+
+class Pedido{
+	
+	private $id,
+			$ISBN,
+			$cantidad,
+			$precio_unitario,
+			$id_compra;
+			
+	private $libro;
+	
+	function __construct($data){
+		$this->id = $data['id'];
+		$this->ISBN = $data['ISBN'];
+		$this->cantidad = $data['cantidad'];
+		$this->precio_unitario = $data['precio_unitario'];
+		$this->id_compra = $data['id_compra'];
+		$this->libro = FALSE;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	
+	function getISBN(){
+		return $this->ISBN;
+	}
+	
+	function getCantidad(){
+		return $this->cantidad;
+	}
+	
+	function getPrecioUnitario(){
+		return $this->precio_unitario;
+	}
+	
+	/** Retorna el precio subtotal para este pedido */
+	function getSubtotal(){
+		return $this->cantidad*$this->precio_unitario;
+	}
+	
+	function getBook(){
+		if (!$this->libro){
+			$this->libro = Books::getBook($this->ISBN);
+		}
+		return $this->libro;
 	}
 	
 }

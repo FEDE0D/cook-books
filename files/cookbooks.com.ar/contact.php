@@ -1,3 +1,4 @@
+<?php include_once('database.php'); ?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -7,7 +8,6 @@
         <link rel="shortcut icon" href="website/favicon/1.png"/>
         <link href="bootstrap-3.1.1-dist/css/bootstrap_Cosmo.css" rel="stylesheet" media="screen">
         <script src="website/jquery-1.11.0.js"></script>
-        <?php include_once('database.php'); ?>
     </head>
     <body>
         <?php include_once('navigation.php'); ?>

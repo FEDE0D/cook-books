@@ -1,3 +1,5 @@
+<?php include_once('database.php'); ?>
+		
 <!DOCTYPE HTML>
 <html>
 	<header>
@@ -7,10 +9,6 @@
 		<script src="website/jquery-1.11.0.js"></script>
 	</header>
 	<body>
-		<?php
-			include_once('database.php');
-		?>
-		
 		<button onclick="printCarrito()">CART PRINT</button><br>
 		<button onclick="agregarACarrito()">CART ADD</button><br>
 		<button onclick="nuevoAutor()">NEW AUTHOR</button><br>
@@ -86,6 +84,22 @@
 			}
 		</script>
 		<br /><br />
-		<div id="result" style="margin: auto; padding: 8px; background-color: #FFD684; width: 800px; height: 500px;"></div>
+		<div id="result" style="margin: auto; padding: 8px; background-color: #FFD684; width: 800px; height: 500px;">
+			<?php
+			
+				echo "MIRAR ACA!";
+				
+				$compras = Compras::getCompras();
+				$compra0 = $compras[0]; //Primera compra
+				$compra0->getTotal(); //$ Total de esa compra
+				
+				$pedidos = $compra0->getPedidos();
+				$pedido0 = $pedidos[0];//Primer pedido de la compra
+				
+				$pedido0->getBook();//Libro de ese pedido
+				$pedido0->getCantidad();//Cantidad del pedido
+				
+			?>
+		</div>
 	</body>
 </html>
