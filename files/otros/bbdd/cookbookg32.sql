@@ -1,12 +1,11 @@
-
 -- phpMyAdmin SQL Dump
 -- version 3.5.2.2
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 11-06-2014 a las 20:02:10
--- Versión del servidor: 5.1.61
--- Versión de PHP: 5.2.17
+-- Tiempo de generación: 20-06-2014 a las 21:09:08
+-- Versión del servidor: 5.5.27
+-- Versión de PHP: 5.4.7
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -18,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `u847065820_cb`
+-- Base de datos: `cookbookg32`
 --
 
 -- --------------------------------------------------------
@@ -35,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `autor` (
   `lugar_nacimiento` varchar(50) COLLATE utf8_unicode_ci DEFAULT '',
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=137 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=111 ;
 
 --
 -- Volcado de datos para la tabla `autor`
@@ -48,9 +47,32 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 (103, 'Doña', 'Gandulfo', '1896-06-29', 'Santiago del Estero, Argentina', 0),
 (104, 'Tonio', 'Rodriguez', '0000-00-00', '', 0),
 (105, 'Cecilia', 'Fassardini', '2014-00-00', '', 0),
-(134, 'Federico', 'Pacheco', '0000-00-00', '', 1),
-(135, 'Federico', 'Pacheco', '0000-00-00', '', 1),
-(136, 'Federico', 'Pacheco', '0000-00-00', '', 1);
+(106, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(107, 'sdasd', 'ad', '0000-00-00', '', 1),
+(108, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(109, 'Federico', 'Pacheco', '1991-05-06', 'Berisso, BA', 1),
+(110, 'Federico', 'Pacheco', '0000-00-00', '', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `compra`
+--
+
+CREATE TABLE IF NOT EXISTS `compra` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fecha` date NOT NULL,
+  `estado` varchar(20) NOT NULL,
+  `username` varchar(30) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+
+--
+-- Volcado de datos para la tabla `compra`
+--
+
+INSERT INTO `compra` (`id`, `fecha`, `estado`, `username`) VALUES
+(1, '2014-06-02', 'pendiente', 'fede0d');
 
 -- --------------------------------------------------------
 
@@ -63,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `escribe` (
   `isbn` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=131 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=238 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
@@ -71,16 +93,19 @@ CREATE TABLE IF NOT EXISTS `escribe` (
 
 INSERT INTO `escribe` (`id`, `isbn`, `id_autor`) VALUES
 (105, 882894293, 100),
-(106, 123456789, 101),
 (107, 879548481, 102),
 (108, 888444777, 103),
 (109, 878987655, 104),
 (110, 1478523698, 105),
 (111, 2147483647, 104),
 (112, 2147483647, 105),
-(128, 1234, 102),
-(129, 1234, 101),
-(130, 1234, 103);
+(206, 12345, 105),
+(211, 1234, 102),
+(212, 1234, 101),
+(213, 1234, 103),
+(235, 123456789, 101),
+(236, 123456789, 103),
+(237, 123456789, 104);
 
 -- --------------------------------------------------------
 
@@ -109,13 +134,14 @@ CREATE TABLE IF NOT EXISTS `libros` (
 
 INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`, `hidden`) VALUES
 ('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro1.jpg', 0, 0),
-('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'libro2.jpg', 0, 0),
+('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'wilber.png', 0, 1),
 ('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0, 0),
 ('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0, 0),
 ('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Descripcion', 'libro5.jpg', 0, 0),
 ('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0, 0),
 ('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0, 0),
-('1234', '12', 'Español', 12, 12, '0004-03-12', '', '', '', 1, 0);
+('1234', '1234', 'Español', 123, 124.99, '2004-03-12', 'test,pruebas', '', '', 1, 1),
+('12345', 'Federico', 'Español', 123, 123, '2014-01-01', '', '', '', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -127,11 +153,18 @@ CREATE TABLE IF NOT EXISTS `pedidos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ISBN` int(11) NOT NULL,
   `cantidad` int(11) NOT NULL,
-  `usuario` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
-  `fecha` date NOT NULL,
-  `estado` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+  `precio_unitario` double NOT NULL,
+  `id_compra` int(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
+
+--
+-- Volcado de datos para la tabla `pedidos`
+--
+
+INSERT INTO `pedidos` (`id`, `ISBN`, `cantidad`, `precio_unitario`, `id_compra`) VALUES
+(2, 882894293, 2, 60, 1),
+(3, 123456789, 1, 50, 1);
 
 -- --------------------------------------------------------
 
@@ -150,6 +183,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `admin` tinyint(1) NOT NULL,
   `fecha_alta` date NOT NULL,
   `fecha_nac` date DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL,
   PRIMARY KEY (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -157,17 +191,19 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`username`, `password`, `nombre`, `apellido`, `direccion`, `mail`, `telefono`, `admin`, `fecha_alta`, `fecha_nac`) VALUES
-('fede0d', 'federico', 'Federico', 'Pacheco', '10 nº 1748', 'federicogpacheco@gmail.com', '2214417432', 0, '2014-04-12', '1991-05-06'),
-('usuario', 'fede', '', '', '', 'caca@caca.com', '', 0, '2014-04-21', '0000-00-00'),
-('uno', 'federico', '', '', '', 'federico@federico', '', 0, '2014-05-13', '0000-00-00'),
-('alguien', 'federico', '', '', '', 'alguien@algo.com', '', 0, '2014-05-12', '0000-00-00'),
-('asd', 'asd', '', '', '', 'asd@asd', '', 0, '2014-05-09', '0000-00-00'),
-('tres', '123', '', '', '', 't@a', '', 0, '2014-05-09', '0000-00-00'),
-('alguien2', 'federico', '', '', '', 'alguien@asd', '', 0, '2014-05-26', '0000-00-00'),
-('admin', 'admin', NULL, NULL, NULL, NULL, NULL, 1, '2014-05-26', '0000-00-00'),
-('otro', 'federico', '', '', '', 'federico@gmail.com', '', 0, '2014-06-01', '0000-00-00'),
-('rami', '123', '', '', '', 'ramiii.92@hotmail.com', '', 0, '2014-06-02', '0000-00-00');
+INSERT INTO `usuarios` (`username`, `password`, `nombre`, `apellido`, `direccion`, `mail`, `telefono`, `admin`, `fecha_alta`, `fecha_nac`, `enabled`) VALUES
+('fede0d', 'federico', 'Federico', 'Pacheco', '10 nº 1748', 'federicogpacheco@gmail.com', '2214417432', 0, '2014-04-12', '1991-05-06', 1),
+('usuario', 'fede', '', '', '', 'caca@caca.com', '', 0, '2014-04-21', '0000-00-00', 0),
+('uno', 'federico', '', '', '', 'federico@federico', '', 0, '2014-05-13', '0000-00-00', 1),
+('alguien', 'federico', '', '', '', 'alguien@algo.com', '', 0, '2014-05-12', '0000-00-00', 0),
+('asd', 'asd', '', '', '', 'asd@asd', '', 0, '2014-05-09', '0000-00-00', 0),
+('tres', '123', '', '', '', 't@a', '', 0, '2014-05-09', '0000-00-00', 0),
+('alguien2', 'federico', '', '', '', 'alguien@asd', '', 0, '2014-05-26', '0000-00-00', 0),
+('admin', 'admin', NULL, NULL, NULL, NULL, NULL, 1, '2014-05-26', '0000-00-00', 1),
+('otro2', 'federico', '', '', '', 'federico@gmail.com', '', 0, '2014-06-01', '0000-00-00', 0),
+('rami', '123', '', '', '', 'ramiii.92@hotmail.com', '', 0, '2014-06-02', '0000-00-00', 1),
+('uno1', 'uno', '', '', '', 'uno@uno', '', 0, '2014-06-20', '0000-00-00', 1),
+('dos', 'dos', '', '', '', 'dos@dos', '', 0, '2014-06-20', '0000-00-00', 1);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
