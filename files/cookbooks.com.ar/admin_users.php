@@ -26,13 +26,16 @@
         <?php include_once('navigation.php'); ?>
         <div class="container-fluid text-center">
             <div class="row">
-                <div class="col-md-4">
+            	<div class="col-md-2">
+            		
+            	</div>
+                <div class="col-md-8">
                 	<div class="panel panel-default" style="max-height: 570px; min-height:570px;">
                 		<div class="panel-heading">Usuarios registrados</div>
                 		<div class="panel-body">
                 			<input id="filter_text" class="form-control" type="text" onkeyup="filter()" />
                 		</div>
-                		<div class="panel-body">
+                		<div id="panel_c" class="panel-body">
                 			<div id="user_list" class="list-group text-left" style="max-height: 350px; min-height:350px; overflow-y: scroll;">
                 				<?php
                 					//Obtener autores
@@ -45,6 +48,7 @@
 													<?php if ($ACTIVE_USER && ($ACTIVE_USER->getUsername()==$value->getUsername())) echo 'active' ?>
 													" 
 											style="<?php if(!$value->getEnabled()){ ?>
+													background-color: #dddddd;
 													font-weight: bold;
 													color: #BBBBBB;
 													<?php } ?>
@@ -66,6 +70,7 @@
                 			<script>
                 				var usuarios = $("#user_list");
                 				var filter_text = $("#filter_text");
+                				
                 				function filter(){
                 					var filter = filter_text.val();
                 					if ($.trim(filter)==''){
@@ -82,20 +87,28 @@
                 					result.each(function(i){
                 						$(this).removeClass("hidden");
                 					});
-                				}
-                				// $(document).ready(function(){
-                					// $("#user_list").animate({
-	                						// scrollTop: $("#user_list").find(".active").offset().top
-	                				// },
-	                				// 500
-                					// );
-                				// });
+                				};
+                				
+                				$(document).ready(function(){
+                					$("#user_list").animate({
+	                					scrollTop: $("#user_list").find(".active").offset().top-210+$("#user_list").scrollTop()
+	                				},
+	                				0
+                					);
+                				});
+                				
                 			</script>
                 		</div>
                 		<div class="panel-footer">
                 			<div class="container-fluid">
                 				<?php if($ACTIVE_USER){ ?>
                 					<a href="profile.php?u=<?php echo $ACTIVE_USER->getUsername(); ?>" class="btn-sm btn-default pull-left">Ver perfil</a>
+                					<strong style="text-decoration: underline">
+                						<?php echo $ACTIVE_USER->getUsername(); ?>
+                					</strong>
+                					<strong>
+                						<?php if(!$ACTIVE_USER->getEnabled()) echo "(deshabilitado)" ?>
+                					</strong>
                 					<?php if($ACTIVE_USER->getEnabled()){ ?>
                 						<a id="btn_disable" class="btn btn-sm btn-danger pull-right" data-loading-text="Deshabilitando..." onclick="disableUser(false)" title="Deshabilita este usuario" >Deshabilitar</a>
                 					<?php }else{ ?>
@@ -135,24 +148,9 @@
 	                		
                 		<?php } ?>
                 	</script>
-                </div><!-- fin col 4 -->
-                <div class="col-md-8 <?php if(!$ACTIVE_USER) echo "hidden" ?>">
-                	<div class="panel panel-default" style="max-height: 570px; min-height:570px;">
-                		<div class="panel-heading">
-                			Usuario:
-                			<strong>
-                			<?php if($ACTIVE_USER) echo $ACTIVE_USER->getUsername() ?>
-                			</strong>
-                		</div>
-                		<div class="panel-body">
-                			Mostrar info del usuario,<br />
-                			fecha de alta, etc
-                		</div>
-                		<div class="panel-footer">
-                			Footer
-                		</div>
-                	</div>
                 </div><!-- fin col 8 -->
+                <div class="col-md-2">
+                </div><!-- fin col 2 -->
             </div><!-- fin row -->
         </div>
         <script src="bootstrap-3.1.1-dist/js/bootstrap.min.js"></script>

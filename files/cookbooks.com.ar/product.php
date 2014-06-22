@@ -1,4 +1,13 @@
-<?php include_once('database.php'); ?>
+<?php
+	include_once('database.php');
+	
+	$book = NULL;
+	if (!isset($_REQUEST['id'])) header('location:./');
+	else{
+		$book = Books::getBook($_REQUEST['id']);
+		if(!$book)	header('location:./');
+	}
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -14,109 +23,94 @@
             <div class="row">
                 <div class="col-md-2">
                 		
-                		<a href="index.php" > <img src="website/img/back1.png" width="100px" height="100px alt="volver" title="volver" "  > </a>
+                		<a href="index.php" > <img src="website/img/btn-volver.png" alt="volver" title="volver" "  > </a>
                 	
                 </div>
                 <div class="col-md-8">
-                		<?php
-                		if (isset($_REQUEST['id'])){
-	                        $book = Books::getBook($_REQUEST['id']);
-						?>
-                	<div class="jumbotron" style="padding: 10px;min-height: 700px">
+                	<div class="jumbotron" style="padding: 10px;min-height: 700px">              		
                         <img src="website/img/logo.png" class="center-block img-responsive" />
-                        <h2 style="margin: 0; padding: 4px"><strong><?php echo $book->getTitulo(); ?></strong></h2>
-                        <p style="padding: 4px">
-                            <?php echo $book->getAutoresString();?><br />
-                        </p>
-
-     
+						<div id="contiene">
+							<div id="cabeza" >
+								<img src="books/img/tapas/<?php echo $book->getTapa() ?>" align="left" style="margin:40px 20px 50px 50px; height:300px; width: 180px">
+								<div style="position: relative; margin-right: 140px; margin-top: 30px; text-align: left">
+								<h2 style="margin: 0; padding: 4px; alignment-adjust: left"><strong><?php echo $book->getTitulo(); ?></strong></h2>
+		                       	<table>
+		                       		
+		                            <tr><h4><strong>Escritor: </strong><?php echo $book->getAutoresString();?></tr></h4>
+		                            <tr><h4><strong>Idioma: </strong><?php echo $book->getIdioma(); ?></h4></tr>
+		                            <tr><h4><strong>Precio: </strong><?php echo "<font color='red'>$".$book->getPrecio()."</font>" ?></h4></tr>
+		                            	<div align="right" style="position:relative; margin-top: 100px ">
+		                            		<?php
+											if ($user = Users::getUserLogin()){
+												if (!$user->getIsAdministrator()){
+												?>
+													<input type="image" src="website/img/btn-compra.png"
+														value="<?php echo $book->getISBN();?>"
+														data-loading-text="Espere..."
+														onclick="
+															<?php
+															//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
+															echo ("
+																var btn = $(this);
+																var btnCart = $('#cartButton');
+	            												btnCart.button('loading');
+																btn.button('loading');
+																$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
+																	function(data){
+																		$.post('navigation.php').done(
+																			function(navbar){
+																				$('#navigationWrapper').replaceWith(navbar);
+																				btn.button('reset');
+																			}
+																		);
+																	}
+																);"
+															);
+															?>
+														">
+													</input>
+												<?php 
+												}
+											}else {
+												
+											}
+											?>
+		                            	</div>
+		                            	</div>
+		                        </table>
+							</div>
+							
+							
+						</div>
 						
-						<table class="table table-hover table-hover ">
+					</div>
+						<div id="cuerpo">
+							</br>
+							<h3>Detalles del libro</h3>
+							<h4 align="left"><strong>Sinopsis: </strong></h4>
+							<h4 align="left">
+								<?php echo $book->getTexto() ?>
+							</h4>
+						</div>	
+						</br>
+						<table class="table">
 							<tr></tr>
 							 <tbody>
 							<tr class="active">
-								<td><strong>Autores</strong></td>
-								<td><strong>Idioma</strong></td>
 								<td><strong>Cantidad de paginas</strong></td>
-								<td><strong>Precio</strong>		</td>
-								<td><strong>Fecha</strong></td>
+								<td><strong>Fecha de edicion</strong></td>
 								<td><strong>Etiquetas</strong></td>
 							</tr>
 							 </tbody>
 							  <tbody>
-						 	<tr  class="active">
-								<td><?php echo $book->getAutoresString();?></br></td>
-								<td><?php echo $book->getIdioma(); ?></br></td>
-								<td><?php echo $book->getPaginas(); ?></br></td>
-								<td>$ <?php echo $book->getPrecio() ?></br></td>
+						 	<tr >								
+								<td><?php echo $book->getPaginas(); ?></br></td>								
 								<td><?php echo $book->getFecha() ?></br></td>
 								<td><?php echo $book->getEtiquetas() ?></br></td>
 							</tr>
 							 </tbody>
 							<tr></tr>
 						</table>
-						</br>
-			
-						<div class="panel panel-default" style="width: 700px; float: right; margin-right: 150px">
-						  <div class="panel-heading"><strong>Descripcion</strong></div>
-						  <div class="panel-body">
-						    <?php echo $book->getTexto() ?>
-						  </div>
-						  
-						</div>
-						<div class="panel panel-default" style="float: left">
-						  <div class="panel-heading"><strong>Comprar</strong></div>
-						  <div class="panel-body" align="center">
-						    <img src="books/img/tapas/<?php echo $book->getTapa() ?>" class="img-rounded img-responsive" style=" height: 80px;">
-						    <?php
-								if ($user = Users::getUserLogin()){
-									if (!$user->getIsAdministrator()){
-									?>
-										<button 
-											value="<?php echo $book->getISBN();?>"
-											data-loading-text="Espere..."
-											onclick="addToCart(this)">Comprar
-										</button>
-										<script>
-											/** Peticion de agregar un libro al carrito, al finalizar recarga el navbar*/
-								        	function addToCart(elem){
-								        		$(elem).button('loading');
-								        		$('#cartButton').button('loading');
-								        		$.ajax({
-								        			url:'ajax.php',
-								        			type:'POST',
-								        			data:{
-								        				type:'CART',
-								        				data:JSON.stringify({
-								        					action:'ADD',
-								        					bookid:$(elem).val()
-								        				})
-								        			},
-								        			success:function(data){
-								        				$.post('navigation.php').done(
-								        					function(navbar){
-								        						$('#navigationWrapper').replaceWith(navbar);
-								        					}
-								        				);
-								        				$(elem).button('reset');
-								        			}
-								        		});
-								        	}
-										</script>
-									<?php 
-									}
-								}else {
-									
-								}
-								?>
-							
-                		</div>
-              			<?php } ?>
-						  </div>
-						  
-						</div>
-						
-						
 						
            	</div>
            <div class="col-md-2">
@@ -128,6 +122,24 @@
        <style>
         	body{
         		background-image: url('website/img/1167024.png');
+        	}
+        	#cabeza{
+        		background-image: url('website/img/menu.png');
+        		background-repeat: no-repeat;
+        		width: 900px; 
+        		height: 400px;
+        		float:left;
+        		position:absolute;
+        		margin-left: 100px;	
+        	}
+        	#cuerpo{
+        		background-image: url('website/img/line.png');
+        		background-repeat: no-repeat;
+        		margin-top: 400px;
+        		padding-left:30px;
+        		padding-right:30px;
+        		max-width: 900px; 
+        		height:auto;
         	}
      
         </style>        

@@ -22,6 +22,7 @@
 	 * 						REMOVE
 	 * 						CLEAR
 	 * 						PRINT_OUT
+	 * 						PURCHASE
 	 */
 
 	include_once('database.php');
@@ -412,6 +413,18 @@ class CartRequest extends Request{
 		Cart::printCart();
 	}
 	
+	function PURCHASE(){
+		$pedidos = Cart::getArticulos();
+		$compra = Compras::createCompra($pedidos);
+		if($compra){
+			Cart::emptyCart();
+			$this->response->setProperty("ok", TRUE);
+			$this->response->setProperty("id_new", $compra->getId());
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "Error al guardar la información de la compra");
+		}
+	}
 }
 
 class JSONResponse{

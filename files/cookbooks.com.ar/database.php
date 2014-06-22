@@ -162,7 +162,7 @@ class Users{
 			SELECT U.username, U.password, U.nombre, U.apellido, U.direccion, U.mail, U.telefono, U.admin, U.fecha_alta, U.fecha_nac, U.enabled
 			FROM usuarios U
 			WHERE (U.admin=0)
-			ORDER BY U.username
+			ORDER BY U.enabled DESC, U.username ASC
 		");
 		$usuarios = array();
 		if ($result){
@@ -1095,6 +1095,20 @@ class Compras{
 		self::$initialized = TRUE;
 	}
 	
+	static function getCompra($idCompra){
+		self::initialize();
+		$data = self::$conexion->query("
+			SELECT *
+			FROM compra C
+			WHERE (C.id='$idCompra')
+		");
+		if ($data){
+			$data = $data->fetch(PDO::FETCH_ASSOC);
+			return new Compra($data);
+		}
+		return NULL;
+	}
+	
 	/** Retorna un array de objetos Compra con todas las compras del sistema */
 	static function getCompras(){
 		self::initialize();
@@ -1110,6 +1124,48 @@ class Compras{
 			}
 		}
 		return $compras;
+	}
+	
+	/** Crea una compra en la base de datos. Recibe los articulos que están en el carrito. Retorna un objeto Compra */
+	static function createCompra($articulos){
+		self::initialize();
+		$today = $today = date("Y-m-d");
+		$user = Users::getUserLogin();
+		if ($user){
+			$username = $user->getUsername();
+			$sql = self::$conexion->query("
+				INSERT INTO compra(
+				`id`,
+				`fecha`,
+				`estado`,
+				`username`
+				)
+				VALUES( NULL, '$today', 'pendiente', '$username')
+			");
+			if ($sql){
+				$compraId = self::$conexion->getLastInsertedID();
+				$sql2 = "
+					INSERT INTO pedidos (`id`,`ISBN`,`cantidad`,`precio_unitario`,`id_compra`)
+					VALUES
+				";
+				foreach ($articulos as $isbn => $info) {
+					$sql2 .= "(NULL, '$isbn', '".$info['cantidad']."', '".$info['precio']."' , '$compraId' ),";
+				}
+				$sql2 = substr($sql2,0,-1);
+				
+				$sql2 = self::$conexion->query($sql2);
+				if ($sql2){
+					return Compras::getCompra($compraId);
+				}else{
+					return NULL;
+				}
+			}else{
+				return NULL;
+			}
+		}else{
+			return NULL;
+		}
+		
 	}
 	
 	/** Guarda los cambios del objeto Compra en la base de datos */
@@ -1167,6 +1223,16 @@ class Compra{
 			$this->pedidos = Pedidos::getPedidos($this->id);
 		}
 		return $this->pedidos;
+	}
+	
+	/** Retorna la cantidad de libros en esta compra */
+	function getCantidadLibros(){
+		$pedidos = $this->getPedidos();
+		$cant = 0;
+		foreach ($pedidos as $key => $pedido) {
+			$cant += $pedido->getCantidad();
+		}
+		return $cant;
 	}
 	
 	/** retorna el precio total para esta compra */
@@ -1360,6 +1426,12 @@ class Cart{
 			$sum += $book['precio']*$book['cantidad'];
 		}
 		return $sum;
+	}
+	
+	/** Retorna un array de los articulos en el carrito */
+	static function getArticulos(){
+		self::initialize();
+		return self::$articulos;
 	}
 	
 	/** Crea la vista para el dropmenu del carrito*/

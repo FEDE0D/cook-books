@@ -163,7 +163,7 @@
                 				<div class="col-md-12">
 	            					<label for="libro_texto" class="pull-left">Descripcion</label>
 	            					<div class="col-lg-10">
-								        <textarea class="form-control" rows="1" id="libro_texto" ><?php if ($LIBRO) echo $LIBRO->getTexto() ?></textarea>
+								        <textarea class="form-control" rows="3" id="libro_texto" ><?php if ($LIBRO) echo $LIBRO->getTexto() ?></textarea>
 							        </div>
 						        </div>
 						        
@@ -172,11 +172,16 @@
                                 	<label for="img_load_btn" class="pull-left">Tapa</label><br /><br />
 									<div id="fileuploader">Upload</div>
                     				<img id="img_tapa" src="books/img/tapas/<?php
-                    					$path = "_DEFAULT_.jpg";
 										if ($LIBRO){
 											echo $LIBRO->getTapa();
 										}
-                    					?>" class="img-rounded img-responsive pull-left" style="height: 100px; padding:10px;">
+                    					?>"
+                    					class="img-rounded img-responsive pull-left" 
+                    					style="height: 100px; padding:10px;"
+                    					value="<?php if ($LIBRO){
+											echo $LIBRO->getTapa();
+										} ?>"
+                    					>
 									</table>
 										
 										<script>
@@ -191,7 +196,7 @@
 														showDone:false,
 														onSuccess:function(files,data,xhr){
 															$("#img_tapa").attr("src","books/img/tapas/"+files);
-															$("#img_tapa").val(files);
+															$("#img_tapa").attr("value",files);
 														}
 													});
 												}
@@ -231,7 +236,7 @@
 														precio: $('#libro_form').find('#libro_precio').val(),
 														tags: $('#libro_form').find('#libro_tags').val(),
 														texto: $('#libro_form').find('#libro_texto').val(),
-														tapa: $("#img_tapa").val(),
+														tapa: $("#img_tapa").attr("value"),
 														autores: autores_param,
 														paginas: $('#libro_form').find('#libro_pag').val()
 													})

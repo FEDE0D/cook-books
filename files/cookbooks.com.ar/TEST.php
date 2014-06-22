@@ -89,6 +89,8 @@
 			
 				echo "MIRAR ACA!";
 				
+				$compra = Compras::getCompra(1);
+				
 				$compras = Compras::getCompras();
 				$compra0 = $compras[0]; //Primera compra
 				$compra0->getTotal(); //$ Total de esa compra
