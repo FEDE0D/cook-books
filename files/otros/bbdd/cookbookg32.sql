@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 20-06-2014 a las 21:09:08
+-- Tiempo de generación: 22-06-2014 a las 02:29:58
 -- Versión del servidor: 5.5.27
 -- Versión de PHP: 5.4.7
 
@@ -85,27 +85,27 @@ CREATE TABLE IF NOT EXISTS `escribe` (
   `isbn` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=238 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=265 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
 --
 
 INSERT INTO `escribe` (`id`, `isbn`, `id_autor`) VALUES
-(105, 882894293, 100),
-(107, 879548481, 102),
-(108, 888444777, 103),
-(109, 878987655, 104),
-(110, 1478523698, 105),
-(111, 2147483647, 104),
-(112, 2147483647, 105),
 (206, 12345, 105),
 (211, 1234, 102),
 (212, 1234, 101),
 (213, 1234, 103),
-(235, 123456789, 101),
-(236, 123456789, 103),
-(237, 123456789, 104);
+(251, 882894293, 100),
+(256, 1478523698, 105),
+(257, 2147483647, 105),
+(258, 2147483647, 104),
+(259, 878987655, 104),
+(260, 879548481, 102),
+(261, 888444777, 103),
+(262, 123456789, 101),
+(263, 123456789, 103),
+(264, 123456789, 104);
 
 -- --------------------------------------------------------
 
@@ -133,13 +133,13 @@ CREATE TABLE IF NOT EXISTS `libros` (
 --
 
 INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`, `hidden`) VALUES
-('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Cocina criolla', 'libro1.jpg', 0, 0),
-('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', '', 'wilber.png', 0, 1),
-('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', '', 'libro3.jpg', 0, 0),
-('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', '', 'libro4.jpg', 0, 0),
-('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Descripcion', 'libro5.jpg', 0, 0),
-('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', '', 'libro6.jpg', 0, 0),
-('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', '', 'libro7.jpg', 0, 0),
+('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'cocina_criolla.jpg', 0, 0),
+('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro1.jpg', 0, 1),
+('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro8.jpg', 0, 0),
+('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'wilber.png', 0, 0),
+('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro7.jpg', 0, 0),
+('1478523698', 'CUPCAKES VEGANOS', 'Español', 55, 47.8, '2011-02-01', 'cupcakes', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro2.jpg', 0, 0),
+('2147483647', 'EL LIBRO DE LAS VIANDAS PARA PEQUENOS', 'Español', 87, 79.84, '2012-01-01', 'viandas', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro3.jpg', 0, 0),
 ('1234', '1234', 'Español', 123, 124.99, '2004-03-12', 'test,pruebas', '', '', 1, 1),
 ('12345', 'Federico', 'Español', 123, 123, '2014-01-01', '', '', '', 1, 1);
 
