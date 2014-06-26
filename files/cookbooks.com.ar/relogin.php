@@ -36,7 +36,7 @@
 	                			<div class="form-group">
 		                			<label for="username" class="col-md-3 control-label">Usuario</label>
 		                			<div class="col-md-9">
-		                				<input name="username" id="username" type="text" placeholder="Username" class="form-control">
+		                				<input name="username" id="username" type="text" placeholder="Username" class="form-control" autocomplete="off">
 		                			</div>
 	                			</div>
 	                			<div class="form-group">

@@ -111,31 +111,64 @@
                 				</div>
                 				<div class="row">
 	                				<div class="col-xs-5">
-	                					<label for="libro_autor" class="pull-left">Autor/es</label></br>
-	                					<?php if ($LIBRO){  ?>
-		                					<div id="contiene2"  style="overflow-y: scroll; height: 178px; text-align: left; ">
-			                					<?php
-			                					$autores = Authors::getAuthors();
-												foreach ($autores as $key => $value) {
-													if ( in_array($value->getID(), $LIBRO->getAutoresIDs_arr()) ){?>
-														<input id="libro_autor" type="checkbox" checked="true" value="<?php echo $value->getID()?>">
-														<?php echo $value->getNombreApellido();?> </br>
-													<?php 
-													}else{ ?>
-														<input id="libro_autor" type="checkbox" value="<?php echo $value->getID()?>"> <?php echo $value->getNombreApellido();?></br>
-													<?php } ?>
-												<?php } ?>
-											</div>
-	                					<?php }  if (!$LIBRO) { ?>
-		                					<div id="contiene"  style="overflow-y: scroll; height: 178px; text-align: left">
-			                					<?php
-			                					$autores = Authors::getAuthors();
-												foreach ($autores as $key => $value) {?>
-													<input id="libro_autor" type="checkbox" value="<?php echo $value->getID()?>"> <?php echo $value->getNombreApellido(); ?></br>
-												<?php }  ?>
-											</div>
-										<?php } ?>
-	                				</div>
+	                					<div class="row">
+                							<label for="libro_autor" class="pull-left" style="margin-left: 16px;">Autor/es</label>
+                						</div>
+        								<div class="row">
+        									<input id="filter_txt" type="text" placeholder="Buscar autor..." class="pull-left input-sm" style="margin-left: 16px; margin-bottom: 4px;" onkeyup="filter()"/>
+        								</div>
+	                					<div id="authors_list" style="overflow-y: scroll; height: 178px; margin-left: 10px;" class="text-left" >
+	                					<?php 
+	                							$autores = Authors::getAuthors();
+												$selected = NULL;
+												if ($LIBRO) $selected = $LIBRO->getAutoresIDs_arr();
+												
+												foreach ($autores as $key => $autor) { ?>
+													<div id="auth_<?php echo $autor->getID(); ?>" value="author">
+														<input
+															id="libro_autor"
+															type="checkbox" 
+															value="<?php echo $autor->getID(); ?>"
+															<?php
+																if($selected && in_array($autor->getID(), $selected))
+																echo 'checked="true"';
+															?>
+														/>
+														<?php echo $autor->getNombreApellido(); ?>
+														<div class="hidden-lg">
+															<?php
+																//Para ser encontrados por el filtro
+																echo strtoupper($autor->getNombreApellido());
+																echo strtolower($autor->getNombreApellido());
+															?>
+														</div>
+													</div>
+										<?php	} ?>
+	                					</div>
+	                					<script type="text/javascript">
+	                						/** Filtra los autores */
+	                						var autores = $("#authors_list");
+	                						var filter_txt = $("#filter_txt");
+	                						
+	                						function filter(){
+	                							var filter = filter_txt.val();
+	                							if ($.trim(filter)==""){
+	                								autores.children().each(function(i){
+	                									$(this).removeClass("hidden");
+	                								});
+	                							}else{
+	                								autores.children().each(function(i){
+	                									$(this).addClass("hidden");
+	                								});
+	                								var r = autores.find(":contains("+filter+")");
+	                								r.each(function(i){
+	                									$(this).removeClass("hidden");
+	                								});
+	                								
+	                							}
+	                						}
+	                					</script>
+									</div><!-- fin col5 -->
 	                				<div class="col-sm-7">
 		                				<div class="col-xs-6">
 		                					<label for="libro_fecha" class="pull-left">Fecha del libro</label>
@@ -174,14 +207,20 @@
                     				<img id="img_tapa" src="books/img/tapas/<?php
 										if ($LIBRO){
 											echo $LIBRO->getTapa();
+										}else{
+											echo "_DEFAULT_.jpg";
 										}
                     					?>"
                     					class="img-rounded img-responsive pull-left" 
                     					style="height: 100px; padding:10px;"
-                    					value="<?php if ($LIBRO){
-											echo $LIBRO->getTapa();
-										} ?>"
-                    					>
+                    					value="<?php
+                    							if ($LIBRO){
+													echo $LIBRO->getTapa();
+												}else{
+													echo "_DEFAULT_.jpg";
+												}
+											?>"
+										>
 									</table>
 										
 										<script>

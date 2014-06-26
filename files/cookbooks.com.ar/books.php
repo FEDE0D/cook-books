@@ -79,11 +79,7 @@
 		}
 			
 		$(document).ready(function(){
-			$("#book_table").on('init.dt', function () {
-				var q = getParameterByName("query");
-				$("#book_table_filter").find("input").val(q);
-				//TODO: Que esto se haga automaticamente
-			}).dataTable({
+			var table = $("#book_table").dataTable({
 				"language": {
 					"url": "website/datatables1.10.0/lang/Spanish.json"
 				},
@@ -166,7 +162,8 @@
 					}
 				]
 			});
-				
+			
+			table.fnFilter(getParameterByName("query"));
     	});
 		
 	</script>

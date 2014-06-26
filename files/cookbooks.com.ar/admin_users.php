@@ -30,10 +30,10 @@
             		
             	</div>
                 <div class="col-md-8">
-                	<div class="panel panel-default" style="max-height: 570px; min-height:570px;">
-                		<div class="panel-heading">Usuarios registrados</div>
+                	<div class="panel panel-info" style="max-height: 570px; min-height:570px;">
+                		<div class="panel-heading"><strong>Usuarios registrados</strong></div>
                 		<div class="panel-body">
-                			<input id="filter_text" class="form-control" type="text" onkeyup="filter()" />
+                			<input id="filter_text" class="form-control" type="text" placeholder="Buscar usuario..." onkeyup="filter()" />
                 		</div>
                 		<div id="panel_c" class="panel-body">
                 			<div id="user_list" class="list-group text-left" style="max-height: 350px; min-height:350px; overflow-y: scroll;">

@@ -23,6 +23,9 @@
 	 * 						CLEAR
 	 * 						PRINT_OUT
 	 * 						PURCHASE
+	 * 			ORDER
+	 * 				action: CONFIRM
+	 * 						CANCEL
 	 */
 
 	include_once('database.php');
@@ -33,6 +36,7 @@
 		else if($_REQUEST['type']=="AUTHOR")	$request = new AuthorRequest($_REQUEST['data']);
 		else if($_REQUEST['type']=="BOOK")		$request = new BookRequest($_REQUEST['data']);
 		else if($_REQUEST['type']=="CART")		$request = new CartRequest($_REQUEST['data']);
+		else if($_REQUEST['type']=="ORDER")		$request = new OrderRequest($_REQUEST['data']);
 	}
 	
 
@@ -75,8 +79,14 @@ class Request{
 
 class UserRequest extends Request{
 	
-	protected	$username,
-				$email;
+	protected	$username,//nunca se usa para modificar datos de usuario
+				$nombre,
+				$apellido,
+				$direccion,
+				$email,
+				$telefono,
+				$fecha_alta,//nunca se usa para modificar datos de usuario
+				$fecha_nac;
 	
 	public function __construct($data){
 		parent::__construct($data);
@@ -138,6 +148,27 @@ class UserRequest extends Request{
 			$this->response->setJSON("false");
 		}else{
 			$this->response->setJSON("true");
+		}
+	}
+	
+	function UPDATE(){
+		$result = Users::getUser($this->username);
+		if ($result){
+			$result->setNombre($this->nombre);
+			$result->setApellido($this->apellido);
+			$result->setDireccion($this->direccion);
+			$result->setEmail($this->email);
+			$result->setTelefono($this->telefono);
+			$result->setFechaNacimiento($this->fecha_nac);
+			if ($result->save()){
+				$this->response->setProperty("ok", TRUE);
+			}else{
+				$this->response->setProperty("ok", FALSE);
+				$this->response->setProperty("message", "Error al actualizar los datos del usuario.");
+			}
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "No se encuentra al usuario en la base de datos!");
 		}
 	}
 			
@@ -425,6 +456,51 @@ class CartRequest extends Request{
 			$this->response->setProperty("message", "Error al guardar la información de la compra");
 		}
 	}
+}
+
+class OrderRequest extends Request{
+	
+	protected $idCompra;
+	
+	public function __construct($data){
+		parent::__construct($data);
+	}
+	
+	public function CONFIRM(){
+		$compra = Compras::getCompra($this->idCompra);
+		if ($compra){
+			$compra->setEstado('efectuado');
+			if ($compra->save()){
+				$this->response->setProperty("ok", TRUE);
+				$this->response->setProperty("id", $compra->getId());
+				
+			}else{
+				$this->response->setProperty("ok", FALSE);
+				$this->response->setProperty("message", "No se pudo actualizar la información de la compra");
+			}
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "No existe ninguna compra con id $this->idCompra");
+		}
+	}
+	
+	public function CANCEL(){
+		$compra = Compras::getCompra($this->idCompra);
+		if ($compra){
+			$compra->setEstado('cancelado');
+			if ($compra->save()){
+				$this->response->setProperty("ok", TRUE);
+				$this->response->setProperty("id", $compra->getId());
+			}else{
+				$this->response->setProperty("ok", FALSE);
+				$this->response->setProperty("message", "No se pudo actualizar la información de la compra");
+			}
+		}else{
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "No existe ninguna compra con id $this->idCompra");
+		}
+	}
+	
 }
 
 class JSONResponse{

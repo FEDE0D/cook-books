@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 22-06-2014 a las 02:29:58
+-- Tiempo de generación: 23-06-2014 a las 18:12:27
 -- Versión del servidor: 5.5.27
 -- Versión de PHP: 5.4.7
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `autor` (
   `lugar_nacimiento` varchar(50) COLLATE utf8_unicode_ci DEFAULT '',
   `eliminado` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=111 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=112 ;
 
 --
 -- Volcado de datos para la tabla `autor`
@@ -51,7 +51,8 @@ INSERT INTO `autor` (`ID`, `nombre`, `apellido`, `fecha_nacimiento`, `lugar_naci
 (107, 'sdasd', 'ad', '0000-00-00', '', 1),
 (108, 'Federico', 'Pacheco', '0000-00-00', '', 1),
 (109, 'Federico', 'Pacheco', '1991-05-06', 'Berisso, BA', 1),
-(110, 'Federico', 'Pacheco', '0000-00-00', '', 1);
+(110, 'Federico', 'Pacheco', '0000-00-00', '', 1),
+(111, 'Kristencita', 'Feola', '0000-00-00', '', 1);
 
 -- --------------------------------------------------------
 
@@ -65,14 +66,16 @@ CREATE TABLE IF NOT EXISTS `compra` (
   `estado` varchar(20) NOT NULL,
   `username` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
 
 --
 -- Volcado de datos para la tabla `compra`
 --
 
 INSERT INTO `compra` (`id`, `fecha`, `estado`, `username`) VALUES
-(1, '2014-06-02', 'pendiente', 'fede0d');
+(1, '2014-06-02', 'pendiente', 'fede0d'),
+(7, '2014-06-22', 'cancelado', 'fede0d'),
+(8, '2014-06-22', 'efectuado', 'uno');
 
 -- --------------------------------------------------------
 
@@ -85,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `escribe` (
   `isbn` int(40) NOT NULL,
   `id_autor` int(40) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=265 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=281 ;
 
 --
 -- Volcado de datos para la tabla `escribe`
@@ -103,9 +106,11 @@ INSERT INTO `escribe` (`id`, `isbn`, `id_autor`) VALUES
 (259, 878987655, 104),
 (260, 879548481, 102),
 (261, 888444777, 103),
-(262, 123456789, 101),
-(263, 123456789, 103),
-(264, 123456789, 104);
+(276, 123456789, 105),
+(277, 123456789, 101),
+(278, 123456789, 103),
+(279, 123456789, 104),
+(280, 123456789, 100);
 
 -- --------------------------------------------------------
 
@@ -134,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `libros` (
 
 INSERT INTO `libros` (`ISBN`, `titulo`, `IDIOMA`, `paginas`, `precio`, `fecha`, `etiquetas`, `texto`, `tapa`, `eliminado`, `hidden`) VALUES
 ('882894293', 'Cocina criolla', 'Español', 87, 58.99, '1983-03-31', 'criolla', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'cocina_criolla.jpg', 0, 0),
-('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro1.jpg', 0, 1),
+('123456789', 'La guía optima para el ayuno de Daniel', 'Español', 68, 69, '2001-08-25', 'guía,desayuno,comida', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro1.jpg', 0, 1),
 ('879548481', 'LAS MEJORES RECETAS DE RICO Y ABUNDANTE', 'Español', 70, 87.45, '2012-07-24', 'recetas', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro8.jpg', 0, 0),
 ('888444777', 'COCINA CON CALOR DE HOGAR - RUSTICA', 'Español', 154, 152.21, '2006-06-06', 'rustica', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'wilber.png', 0, 0),
 ('878987655', 'LA DIETA DE LOS ZUMOS', 'Español', 54, 99.99, '1999-03-15', 'zumos, jugos', 'Coincidiendo con la llegada al Palacio de La Moncloa del actual presidente del Gobierno, Mariano Rajoy, y su familia, Julio González de Buitrago, el cocinero de la casa durante treinta y tres años, se jubila. Es el momento de hacer balance, de compartir con los lectores recuerdos y vivencias, momentos estelares y pequeños sinsabores. Descubrir curiosidades inéditas que nos hablan de la cara más humana de nuestros presidentes y sus familias, pero también de ídolos del deporte, representantes de la cultura o grandes estadistas internacionales. Salpican estas páginas diversas recetas especialmente queridas por el autor, que ahora comparte con los lectores.', 'libro7.jpg', 0, 0),
@@ -156,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `pedidos` (
   `precio_unitario` double NOT NULL,
   `id_compra` int(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=17 ;
 
 --
 -- Volcado de datos para la tabla `pedidos`
@@ -164,7 +169,12 @@ CREATE TABLE IF NOT EXISTS `pedidos` (
 
 INSERT INTO `pedidos` (`id`, `ISBN`, `cantidad`, `precio_unitario`, `id_compra`) VALUES
 (2, 882894293, 2, 60, 1),
-(3, 123456789, 1, 50, 1);
+(3, 123456789, 1, 50, 1),
+(16, 1478523698, 1, 47.8, 8),
+(15, 2147483647, 2, 79.84, 8),
+(14, 878987655, 3, 99.99, 8),
+(13, 2147483647, 2, 79.84, 7),
+(12, 1478523698, 1, 47.8, 7);
 
 -- --------------------------------------------------------
 

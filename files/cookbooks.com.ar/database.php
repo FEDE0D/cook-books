@@ -1,5 +1,7 @@
 <?php
 
+global $DB_CONECTED; //Usada para manejar múltiples conexiones a la BBDD 
+
 /**
  * Clase Conexion (usada por otras clases para comunicarse con la base de datos)
  */
@@ -7,12 +9,12 @@ class Conexion {
 	
 	private $local = TRUE;//Indica si estoy trabajando con un servidor local.
 	private $hostname = 'localhost';
-	private $port = '8080';
+	private $port = '3306';
 	private $username = 'root';
 	private $password = 'F3Dericcio';
 	private $dbname = 'cookbookg32';
 	
-	private $dbh;
+	private static $dbh = NULL;
 	
 
 	function __construct(){
@@ -28,34 +30,35 @@ class Conexion {
 	/** Conecta a la base de datos */
 	function conectar(){
 		try {
-			$this->dbh = new PDO("mysql:host=$this->hostname;dbname=$this->dbname;port=$this->port", $this->username, $this->password, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+			if (!self::$dbh)
+			self::$dbh = new PDO("mysql:host=$this->hostname;dbname=$this->dbname;port=$this->port", $this->username, $this->password, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 			
 			//echo "Conectado a la bbdd";
 			return true;
 		} catch(PDOException $e) {
-			//echo $e -> getMessage();
+			echo $e -> getMessage();
 			return false;
 		}
 	}
 	
 	/** Desconecta de la base de datos */
 	function desconectar(){
-		$this->dbh = null;//close database connection
+		self::$dbh = null;//close database connection
 		// echo "Desconectado de la bbdd";
 	}
 	
 	/** Realiza una consulta a la base de datos, retorna el output de la consulta*/
 	function query($statement){
-		return $this->dbh->query($statement);
+		return self::$dbh->query($statement);
 	}
 	
 	/** Retorna un Array con la información asociada a la última operación realizada */
 	function getLastError(){
-		return $this->dbh->errorInfo();
+		return self::$dbh->errorInfo();
 	}
 	
 	function getLastInsertedID(){
-		return $this->dbh->lastInsertId();
+		return self::$dbh->lastInsertId();
 	}
 	
 	/*
@@ -84,6 +87,7 @@ class Conexion {
 		foreach ($result as $row => $columns) {
 			$string .= "<tr>";
 			foreach ($columns as $columnName => $columnValue) {
+				if ($columnName=="tapa" && !is_file("books/img/tapas/".$columnValue)) $columnValue = "_DEFAULT_.jpg"; //Si no existe la tapa, pone una por defecto
 				$string .= "<td>".$columnValue."</td>";
 			}
 			$string .= "</tr>";
@@ -235,7 +239,6 @@ class Users{
 		$result = self::$conexion->insert($query);
 		if ($result){
 			if ($result->rowCount()==1){
-				//TODO: retornar nuevo usuario sacando info de $result en lugar de pedir nuevos datos?
 				return self::userExists2($username, $password);
 			}else return NULL;
 		}else return NULL;
@@ -519,7 +522,7 @@ class Books{
 	static function getCatalogo(){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.apellido) as autores, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas, L.tapa
+			SELECT L.ISBN, L.titulo, GROUP_CONCAT(A.nombre,' ',A.apellido) as autores, L.paginas, L.precio, L.IDIOMA as idioma, L.fecha, L.etiquetas, L.tapa
 			FROM libros L
 			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
 			LEFT JOIN autor A ON (E.id_autor=A.ID)
@@ -1106,16 +1109,20 @@ class Compras{
 			$data = $data->fetch(PDO::FETCH_ASSOC);
 			return new Compra($data);
 		}
-		return NULL;
+		
+		return NULL;self::$conexion->desconectar();
 	}
 	
 	/** Retorna un array de objetos Compra con todas las compras del sistema */
-	static function getCompras(){
+	static function getCompras($username = FALSE){
 		self::initialize();
-		$data = self::$conexion->query("
+		$query = "
 			SELECT *
 			FROM compra C
-		");
+		";
+		if($username) $query .= "WHERE (C.username='$username')";
+		
+		$data = self::$conexion->query($query);
 		$compras = array();
 		if ($data){
 			$data = $data->fetchAll(PDO::FETCH_ASSOC);
@@ -1123,7 +1130,8 @@ class Compras{
 				array_push($compras, new Compra($value));
 			}
 		}
-		return $compras;
+		
+		return $compras;self::$conexion->desconectar();
 	}
 	
 	/** Crea una compra en la base de datos. Recibe los articulos que están en el carrito. Retorna un objeto Compra */
@@ -1171,9 +1179,12 @@ class Compras{
 	/** Guarda los cambios del objeto Compra en la base de datos */
 	static function updateCompra(Compra $compra){
 		self::initialize();
+		$idCompra = $compra->getId();
+		$estado = $compra->getEstado();
 		$data = self::$conexion->query("
 			UPDATE compra
-			SET estado = '$compra->getEstado()'
+			SET estado = '$estado'
+			WHERE (id='$idCompra') 
 		");
 		if ($data){
 			return TRUE;

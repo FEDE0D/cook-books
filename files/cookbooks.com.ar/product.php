@@ -23,7 +23,7 @@
             <div class="row">
                 <div class="col-md-2">
                 		
-                		<a href="index.php" > <img src="website/img/btn-volver.png" alt="volver" title="volver" "  > </a>
+                	
                 	
                 </div>
                 <div class="col-md-8">
@@ -44,35 +44,13 @@
 											if ($user = Users::getUserLogin()){
 												if (!$user->getIsAdministrator()){
 												?>
-													<input type="image" src="website/img/btn-compra.png"
+													<button
 														value="<?php echo $book->getISBN();?>"
 														data-loading-text="Espere..."
-														onclick="
-															<?php
-															//Javascript pide agregar un libro al carrito, al finalizar recarga el navbar
-															echo ("
-																var btn = $(this);
-																var btnCart = $('#cartButton');
-	            												btnCart.button('loading');
-																btn.button('loading');
-																$.post('ajax.php', {type:'cart',action:'ADD', bookid:'".$book->getISBN()."'}).done(
-																	function(data){
-																		$.post('navigation.php').done(
-																			function(navbar){
-																				$('#navigationWrapper').replaceWith(navbar);
-																				btn.button('reset');
-																			}
-																		);
-																	}
-																);"
-															);
-															?>
-														">
-													</input>
+														onclick="addToCart(this)">Comprar
+													</button>
 												<?php 
 												}
-											}else {
-												
 											}
 											?>
 		                            	</div>
@@ -97,13 +75,15 @@
 							<tr></tr>
 							 <tbody>
 							<tr class="active">
+								<td><strong>ISBN</strong></td>
 								<td><strong>Cantidad de paginas</strong></td>
 								<td><strong>Fecha de edicion</strong></td>
 								<td><strong>Etiquetas</strong></td>
 							</tr>
 							 </tbody>
 							  <tbody>
-						 	<tr >								
+						 	<tr >
+						 		<td><?php echo $book->getISBN() ?></br></td>								
 								<td><?php echo $book->getPaginas(); ?></br></td>								
 								<td><?php echo $book->getFecha() ?></br></td>
 								<td><?php echo $book->getEtiquetas() ?></br></td>
@@ -111,7 +91,7 @@
 							 </tbody>
 							<tr></tr>
 						</table>
-						
+							<button onclick="window.location.href='index.php'">Volver atr&aacute;s</button>
            	</div>
            <div class="col-md-2">
            	
@@ -142,7 +122,35 @@
         		height:auto;
         	}
      
-        </style>        
+        </style>  
+        <script>
+        	/** Peticion de agregar un libro al carrito, al finalizar recarga el navbar*/
+        	function addToCart(elem){
+        		$(elem).button('loading');
+        		$('#cartButton').button('loading');
+        		$.ajax({
+        			url:'ajax.php',
+        			type:'POST',
+        			data:{
+        				type:'CART',
+        				data:JSON.stringify({
+        					action:'ADD',
+        					bookid:$(elem).val()
+        				})
+        			},
+        			success:function(data){
+        				$.post('navigation.php').done(
+        					function(navbar){
+        						$('#navigationWrapper').replaceWith(navbar);
+        					}
+        				);
+        				$(elem).button('reset');
+        			}
+        		});
+        	}
+        	
+        	/**  */
+        </script>      
         
     </body>
 </html>
