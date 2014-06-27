@@ -37,8 +37,11 @@
                 <div class="col-md-4">
                 	<div class="panel panel-default">
                 		<div class="panel-heading">Autores registrados</div>
+                		<div class="well well-sm">
+            				<input id="filter_input" type="text" class="form-control" onkeyup="filter()" placeholder="Buscar autor..." />
+            			</div>
                 		<div class="panel-body" style="max-height: 475px; min-height:475px; overflow-y: scroll;">
-                			<div class="list-group text-left">
+                			<div id="authors_list" class="list-group text-left">
                 				<?php
                 					//Obtener autores
                 					$autores = Authors::getAuthors();
@@ -48,12 +51,41 @@
 										<!-- <a href="admin_authors.php?id=xxx" class="list-group-item active?">Nombre Apellido</a> -->
 										<a id="auth_<?php echo $value->getID(); ?>" href="admin_authors.php?id=<?php echo $value->getID(); ?>" class="list-group-item <?php if ($ID_ACTIVE==$value->getID()) echo 'active' ?>">
 											<?php echo $value->getApellido().', '.$value->getNombre(); ?>
+											<div style="display: none;">
+												<?php
+													echo strtolower($value->getNombreApellido());
+												?>
+											</div>
 											<span class="badge" title="Cantidad de libros"><?php echo count($books); ?></span>
 										</a>
 										<?php
 									}
                 				?>
                 			</div>
+                			<script type="text/javascript">
+                				var autores = $("#authors_list");
+                				var filter_input = $("#filter_input");
+                				
+                				function filter(){
+                					var text = filter_input.val().toLowerCase();
+                					
+                					if ($.trim(text)==""){
+                						autores.children().each(function(i){
+                							$(this).removeClass("hidden");
+                						});
+                					}else{
+                						autores.children().each(function(i){
+                							if (!$(this).hasClass("active"))
+                								$(this).addClass("hidden");
+                						});
+                						autores.find(":contains("+text+")").each(function(i){
+                							$(this).removeClass("hidden");
+                						});
+                						
+                					}
+                				}
+                				
+                			</script>
                 		</div>
                 		<div class="panel-footer">
                 			<div class="container-fluid">

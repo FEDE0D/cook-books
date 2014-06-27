@@ -32,7 +32,7 @@
                 <div class="col-md-8">
                 	<div class="panel panel-info" style="max-height: 570px; min-height:570px;">
                 		<div class="panel-heading"><strong>Usuarios registrados</strong></div>
-                		<div class="panel-body">
+                		<div class="well well-sm">
                 			<input id="filter_text" class="form-control" type="text" placeholder="Buscar usuario..." onkeyup="filter()" />
                 		</div>
                 		<div id="panel_c" class="panel-body">

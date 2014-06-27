@@ -137,7 +137,7 @@
         </script>
         <style>
         	body{
-        		background-image: url('website/img/779730.png');
+        		background-image: url('website/img/bg.gif');
         	}
         </style>
     </body>

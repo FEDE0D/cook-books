@@ -157,7 +157,7 @@
         				var resp = $.parseJSON(data);
         				if(resp.ok){
         					alert("La compra se efectuo con éxito!\n");
-        					document.location.href="history.php?new="+resp.id_new;
+        					document.location.href="history.php?historial="+resp.id_new;
         				}else{
         					done = false;
         					alert("Hubo un error al efectuar la compra.\nPor favor intente nuevamente.");

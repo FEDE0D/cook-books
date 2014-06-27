@@ -1,6 +1,5 @@
 <?php
 
-global $DB_CONECTED; //Usada para manejar múltiples conexiones a la BBDD 
 
 /**
  * Clase Conexion (usada por otras clases para comunicarse con la base de datos)
@@ -498,11 +497,23 @@ class Books{
 	static function getBestSellers($cantidad){
 		self::initialize();
 		$result = self::$conexion->query("
-			SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
-			FROM libros L
-			LEFT JOIN escribe E ON (L.ISBN=E.isbn)
-			WHERE (L.eliminado=0 AND L.hidden=0)
-			Group by L.ISBN
+			SELECT T1.ISBN, T1.titulo, T1.autores, T1.paginas, T1.precio, T1.IDIOMA, T1.fecha, T1.etiquetas, T1.texto, T1.tapa, T1.eliminado, T1.hidden
+			FROM (
+					SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
+				    FROM libros L
+				    INNER JOIN escribe E ON (L.ISBN=E.isbn)
+				    WHERE (L.eliminado=0 AND L.hidden=0)
+				    GROUP BY E.isbn
+				) AS T1
+			INNER JOIN (
+					SELECT P.id, P.ISBN, sum(P.cantidad) as cantidad
+			        FROM pedidos P
+			        INNER JOIN compra C ON (P.id_compra=C.id)
+			        WHERE (C.estado='efectuado')
+			        GROUP BY (P.ISBN)
+			        ORDER BY cantidad DESC
+				)as T2 ON (T2.ISBN=T1.ISBN)
+			ORDER BY T2.cantidad DESC
 			LIMIT $cantidad
 		");
 		$resultado = Array();
@@ -541,7 +552,7 @@ class Books{
 			LEFT JOIN escribe E ON (A.ID=E.id_autor)
 			INNER JOIN libros L ON (L.ISBN=E.isbn)
 			GROUP BY (L.ISBN)
-			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0 AND L.hidden=0)
+			HAVING (autores LIKE '%$author_id%' AND L.eliminado=0  )
 		");
 		$books = Array();
 		if ($result){

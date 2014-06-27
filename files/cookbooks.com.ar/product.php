@@ -7,6 +7,9 @@
 		$book = Books::getBook($_REQUEST['id']);
 		if(!$book)	header('location:./');
 	}
+	
+	$user = Users::getUserLogin();
+	
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -22,8 +25,6 @@
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-2">
-                		
-                	
                 	
                 </div>
                 <div class="col-md-8">
@@ -41,7 +42,7 @@
 		                            <tr><h4><strong>Precio: </strong><?php echo "<font color='red'>$".$book->getPrecio()."</font>" ?></h4></tr>
 		                            	<div align="right" style="position:relative; margin-top: 100px ">
 		                            		<?php
-											if ($user = Users::getUserLogin()){
+											if ($user){
 												if (!$user->getIsAdministrator()){
 												?>
 													<button
@@ -50,6 +51,9 @@
 														onclick="addToCart(this)">Comprar
 													</button>
 												<?php 
+												}else if($user->getIsAdministrator()){ ?>
+													<a href="admin_books.php?id=<?php echo $book->getISBN(); ?>" class="btn btn-default">Editar libro</a>
+												<?php
 												}
 											}
 											?>

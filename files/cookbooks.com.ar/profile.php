@@ -5,9 +5,26 @@
 	if (!$user ){
 		Errors::error("Sin privilegios", "No tienes privilegios para ver esta pagina!");
 	}
+	else{
+		if ($user->getIsAdministrator()){
+			if (isset($_REQUEST['u'])){
+			 $username = $_REQUEST['u'];
+			 $USER = Users::getUser($username);
+			}
+			else Errors::error("El administrador no puede ver su perfil");
+		}
+		
+	
+		else{
+			$USER = NULL ;
+			 $USER = Users::getUserLogin();
+	
+		}
+	}
 ?>
                                                                              
 <!DOCTYPE html>
+
 <html lang="es">
     <head>
         <title>Cook-Book</title>
@@ -18,12 +35,8 @@
         <script src="website/jquery-1.11.0.js"></script>
     </head>
 	<body>
-        <?php include_once('navigation.php');?>
-        <?php
-		$USER = NULL ;
-		 $USER = Users::getUserLogin();
-	    ?>
-         
+        <?php include_once('navigation.php'); ?>
+      
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-2">
@@ -121,18 +134,23 @@
 		                			  </script>
 		                					   					      
 	                			</form>
+	                			
 	                			<p><div id="error_alert" class="alert alert-warning hidden"></div></p>
+	                			
+	                			<div class="row">
+					                <div class="col-md-2">
+				                			 <button type="button" onclick="window.location.href='password.php'" class="btn btn-default btn-xs" >
+											    <span class="glyphicon glyphicon-lock" ></span>  Cambiar contraseña
+											 </button>
+	                			 	</div>
+	                			</div>
 	                			
                 			</div>
                 		</div>
                 		
                 		<div class="panel-footer">
-                			
-		                			<a id="btn_save" class="btn btn-sm btn-default"  onclick="saveUser()" data-loading-text="Guardando...">Cambiar Contraseña</a>
-				 					<a id="btn_save" class="btn btn-sm btn-default"  onclick="saveUSER()" data-loading-text="Guardando...">Guardar</a>
-    			
-                	
-                		</div>
+                				<a id="btn_save" class="btn btn-sm btn-default"  onclick="saveUSER()" data-loading-text="Guardando...">Guardar</a>
+			     		</div>
                 </div>
             </div>
         </div>
@@ -140,7 +158,7 @@
      	
      	<style>
         	body{
-        		background-image: url('website/img/perfil.png');
+        		background-image: url('website/img/azul.png');
         	}
         </style>
      		

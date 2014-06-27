@@ -40,8 +40,11 @@
                 <div class="col-md-4">
                 	<div class="panel panel-default">
                 		<div class="panel-heading">Libros registrados</div>
+                		<div class="well well-sm">
+            				<input id="filter_input" class="form-control" type="text" onkeyup="filter_books()" placeholder="Buscar libro..." />
+            			</div>
                 		<div class="panel-body" style="max-height: 475px; min-height:475px; overflow-y: scroll;">
-                			<div class="list-group text-left">
+                			<div id="books_list" class="list-group text-left">
                 				<?php
 	            					$libros = Books::getBooksAvailable();
 	            					foreach ($libros as $key => $value) { 
@@ -54,11 +57,41 @@
 											class="list-group-item <?php if ($ID_ACTIVE==$value->getISBN()) echo 'active' ?>"
 											>
 											<?php echo $value->getTitulo().' ('.$value->getAutoresString().')'; ?>
+											<div style="display:none;">
+												<?php
+													$s = $value->getTitulo().' ('.$value->getAutoresString().')';
+													echo strtolower($s);
+												?>
+											</div>
 										</a>
 								<?php
 									}
 								?>
                 			</div>
+                			<script type="text/javascript">
+                				var filter_input = $("#filter_input");
+                				var libros = $("#books_list");
+                				
+                				function filter_books(){
+                					console.log("asd");
+                					var text = filter_input.val().toLowerCase();
+                					
+                					if ($.trim(text)==""){
+                						libros.children().each(function(i){
+                							$(this).removeClass("hidden");
+                						});
+                					}else{
+                						libros.children().each(function(i){
+                							if (!$(this).hasClass("active"))
+                								$(this).addClass("hidden");
+                						});
+                						
+                						libros.find(":contains("+text+")").each(function(i){
+                							$(this).removeClass("hidden");
+                						});
+                					}
+                				}
+                			</script>
                 		</div>
                 		<div class="panel-footer">
                 			<div class="container-fluid">
@@ -135,7 +168,7 @@
 															?>
 														/>
 														<?php echo $autor->getNombreApellido(); ?>
-														<div class="hidden-lg">
+														<div style="visibility:hidden; display:none;  ">
 															<?php
 																//Para ser encontrados por el filtro
 																echo strtoupper($autor->getNombreApellido());
