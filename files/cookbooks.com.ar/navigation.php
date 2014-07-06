@@ -62,6 +62,8 @@
 				                		<li class="divider"></li>
 				                		<li><a href="admin_authors.php"><span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;&nbsp;Administrar autores</a></li>
 					                    <li class="divider"></li>
+					                    <li><a href="admin_reports.php"><span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;&nbsp;Ver reportes</a></li>
+					                    <li class="divider"></li>
 				                	<?php }else{ ?>
 					                    <li><a href="history.php"><span class="glyphicon glyphicon-time"></span>&nbsp;&nbsp;&nbsp;Ver el estado de mis compras</a></li>
 					                    <li class="divider"></li>

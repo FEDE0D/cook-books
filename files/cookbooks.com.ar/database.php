@@ -1153,6 +1153,27 @@ class Compras{
 		return $compras;self::$conexion->desconectar();
 	}
 	
+	/** Retorna un array de objetos Compra con todas las compras del sistema con el estado $estado */
+	static function getComprasConEstado($estado){
+		self::initialize();
+		$query = "
+			SELECT *
+			FROM compra C
+			WHERE (estado='$estado')
+		";
+		
+		$data = self::$conexion->query($query);
+		$compras = array();
+		if ($data){
+			$data = $data->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($data as $key => $value) {
+				array_push($compras, new Compra($value));
+			}
+		}
+		
+		return $compras;self::$conexion->desconectar();
+	}
+	
 	/** Crea una compra en la base de datos. Recibe los articulos que están en el carrito. Retorna un objeto Compra */
 	static function createCompra($articulos){
 		self::initialize();

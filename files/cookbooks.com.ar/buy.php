@@ -140,7 +140,7 @@
         	/** Realiza la petición ajax para efectuar la compra */
         	function comprar(){
         		if (!verificar()) return;
-        		if (!confirm("De verdad desea realizar el pago por esta compra?")) return;
+        		if (!confirm("Presione Aceptar para confirmar el pago por esta compra")) return;
         		if (done) return;
         		done = true;
         		
