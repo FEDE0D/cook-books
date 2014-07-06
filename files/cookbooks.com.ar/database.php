@@ -272,7 +272,11 @@ class Users{
 		if (session_status() == PHP_SESSION_NONE) session_start();
 		if (isset($_SESSION['username'])){
 			$username = $_SESSION['username'];
-			$info = self::$conexion->query("SELECT * FROM usuarios WHERE username='$username' ");
+			$info = self::$conexion->query("
+				SELECT *
+				FROM usuarios
+				WHERE (username='$username' AND enabled='1')
+			");
 			if ($info->rowCount() == 1){
 				$array = $info->fetch(PDO::FETCH_ASSOC);
 				return new User($array);
@@ -382,6 +386,10 @@ class User{
 	
 	function getEnabled(){
 		return $this->enabled;
+	}
+	
+	function getCompras(){
+		return Compras::getCompras($this->getUsername());
 	}
 	
 	function setPassword($newPassword){

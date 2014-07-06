@@ -110,13 +110,21 @@ class UserRequest extends Request{
 	
 	public function DISABLE(){
 		$user = Users::getUser($this->username);
+		$compras = $user->getCompras();
+		foreach ($compras as $key => $compra) {
+			if ($compra->getEstado()=='pendiente'){
+				$this->response->setProperty("ok", FALSE);
+				$this->response->setProperty("message", "No se pudo deshabilitar al usuario porque tiene pedidos pendientes.");
+				return;
+			}
+		}
 		if ($user){
 			$user->setEnabled(0);
 			if ($user->save()){
 				$this->response->setProperty("ok", TRUE);
 			}else{
 				$this->response->setProperty("ok", FALSE);
-			$this->response->setProperty("message", "No se pudo actualizar la informacion del usuario");
+				$this->response->setProperty("message", "No se pudo actualizar la informacion del usuario");
 			}
 		}else{
 			$this->response->setProperty("ok", FALSE);
@@ -445,6 +453,12 @@ class CartRequest extends Request{
 	}
 	
 	function PURCHASE(){
+		$user = Users::getUserLogin();
+		if (!$user){
+			$this->response->setProperty("ok", FALSE);
+			$this->response->setProperty("message", "Error al crear compra, el usuario no existe!");
+			return;
+		}
 		$pedidos = Cart::getArticulos();
 		$compra = Compras::createCompra($pedidos);
 		if($compra){

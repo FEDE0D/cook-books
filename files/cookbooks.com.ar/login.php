@@ -6,6 +6,7 @@
 			Users::saveLogin($user);
 			header( 'Location: ./' ) ;
 		}else{
+			Users::removeLogin();
 			Errors::error("Usuario no admitido", "Has sido dado de baja en el sitio!<br />Por favor contactese con el administrador del sitio");
 		}
 	}else{//no es un usuario existente
