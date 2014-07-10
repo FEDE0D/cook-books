@@ -1,9 +1,16 @@
 <?php include_once('database.php'); ?>
 <?php
+	$user = Users::getUserLogin();
+	if (!$user || !$user->getIsAdministrator()){
+		Errors::error("Sin privilegios", "No tienes privilegios para ver esta pagina!");
+	}
+
 	$SYSTEM_TOTAL = isset($_REQUEST['system']) && isset($_REQUEST['total']);
 	$USER_PURCHASE = isset($_REQUEST['user']) && isset($_REQUEST['purchase']);
 	$USER_REGISTER = isset($_REQUEST['user']) && isset($_REQUEST['register']);
 	$BOOK_PURCHASE = isset($_REQUEST['book']) && isset($_REQUEST['purchase']);
+	
+	if (!$SYSTEM_TOTAL && !$USER_PURCHASE && !$USER_REGISTER && !$BOOK_PURCHASE) header("Location: admin_reports.php?system&total");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -34,16 +41,16 @@
                 		<div class="list-group">
                 			<li class="list-group-item list-group-item-success">Sistema</li>
                 			<div class="text-left">
-	                			<a href="?system&total" class="list-group-item">Total de compras</a>
+	                			<a href="?system&total" class="list-group-item  <?php if ($SYSTEM_TOTAL) echo 'active'; ?>">Total de compras</a>
             				</div>
                 			<li class="list-group-item list-group-item-success">Usuarios</li>
                 			<div class="text-left">
-            					<a href="?user&purchase" class="list-group-item">Compras por usuario</a>
-            					<a href="?user&register" class="list-group-item">Registros de usuario</a>
+            					<a href="?user&purchase" class="list-group-item <?php if ($USER_PURCHASE) echo 'active'; ?>">Compras por usuario</a>
+            					<a href="?user&register" class="list-group-item <?php if ($USER_REGISTER) echo 'active'; ?>">Registros de usuario</a>
             				</div>
             				<li class="list-group-item list-group-item-success">Libros</li>
             				<div class="text-left">
-            					<a href="?book&purchase" class="list-group-item">Resumen de compras</a>
+            					<a href="?book&purchase" class="list-group-item <?php if ($BOOK_PURCHASE) echo 'active'; ?>">Resumen de compras</a>
             				</div>
             			</div>
                 		<!-- <div class="panel-footer">
@@ -72,6 +79,8 @@
 										$total += $e->getTotal();
 									}
 									
+									$meses = Compras::getByMonth();
+									
 									?>
 									
 									<div class="panel panel-default">
@@ -79,8 +88,81 @@
 											<h3>
 												Recaudación total: <span style="color: red">$<?php echo $total; ?></span>
 											</h3>
+											<h4>Recaudación por mes:</h4>
+											<h6>
+												<table id="system_total_mes_table" class="table table-striped table-bordered table-responsive text-right">
+													<thead>
+														<th class="text-right">Mes</th>
+														<th class="text-right">Año</th>
+														<th class="text-right">Subtotal del mes</th>
+													</thead>
+													<tbody>
+												<?php
+													foreach ($meses as $key => $meses) { ?>
+														<tr>
+															<td><?php
+																switch ($meses['month']) {
+																	case 1:
+																		echo "Enero";
+																		break;
+																	case 2:
+																		echo "Febrero";
+																	break;
+																	case 3:
+																		echo "Marzo";
+																		break;
+																	case 4:
+																		echo "Abril";
+																		break;
+																	case 5:
+																		echo "Mayo";
+																		break;
+																	case 6:
+																		echo "Junio";
+																		break;
+																	case 7:
+																		echo "Julio";
+																		break;
+																	case 8:
+																		echo "Agosto";
+																		break;
+																	case 9:
+																		echo "Septiembre";
+																		break;
+																	case 10:
+																		echo "Octubre";
+																		break;
+																	case 11:
+																		echo "Noviembre";
+																		break;
+																	case 12:
+																		echo "Diciembre";
+																		break;
+																	default:
+																		
+																		break;
+																}
+															?></td>
+															<td><?php echo $meses['year'] ?></td>
+															<td>$<?php echo $meses['subtotal'] ?></td>
+														</tr>
+												<?php
+													} 
+												?>	</tbody>
+												</table>
+												<script>
+													$("#system_total_mes_table").dataTable({
+														"language": {
+															"url": "website/datatables1.10.0/lang/Spanish.json"
+														},
+														info: false,
+														filter: false,
+														"pagingType": "simple_numbers"
+													});
+												</script>
+											</h6>
 										</div>
-										<div class="panel-heading text-left"><strong>Detalle de compras</strong></div>
+										<div class="panel-heading text-left"><strong>Todas las compras</strong></div>
 										<div class="panel-body">
 											<table id="system_total_table" class="table table-striped table-bordered table-responsive" >
 												<thead class="text-center">
@@ -153,8 +235,71 @@
 										</div>
 									</div>
                 					<?php
-                				}else if ($USER_PURCHASE){
-                					
+                				}else if ($USER_PURCHASE){ ?>
+                					<?php
+                						$users = Users::getUsers(TRUE);
+                					?>
+                					<div class="panel panel-default">
+                						<div class="panel-body">
+											<label class="label label-default pull-left">Los 5 usuarios más activos</label>
+											<div class="panel-body">
+												<?php
+													$gastos = Users::getUsersExpenses(TRUE);
+													$gastos = array_slice($gastos, 0, 5);
+													
+													?>
+													<table class="table table-responsive">
+														<thead>
+															<th>Usuario</th>
+															<th>Gasto total</th>
+															<th>Cantidad de libros</th>
+														</thead>
+														<tbody class="text-left">
+													<?php
+														foreach ($gastos as $key => $gasto) {
+														?>
+															<tr>
+																<td><a href="profile.php?u=<?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
+																<td><span style="color: red">$<?php echo $gasto['gastos']; ?></span></td>
+																<td><span style="color: blue">(<?php echo $gasto['libros']; ?> libros)</span></td>
+															</tr>
+														<?php
+													}
+													?>
+														</tbody>
+													</table>
+													<?php
+												?>
+											</div>
+											<label class="label label-default pull-left">Todos los usuarios</label>
+											<div class="panel-body">
+											<?php
+												$gastos = Users::getUsersExpenses(FALSE);
+												?>
+												<table class="table table-responsive">
+													<thead>
+														<th>Usuario</th>
+														<th>Gasto total</th>
+														<th>Cantidad de libros</th>
+													</thead>
+													<tbody class="text-left">
+												<?php
+													foreach ($gastos as $key => $gasto) {
+													?>
+														<tr>
+															<td><a href="profile.php?u=<?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
+															<td><span style="color: red">$<?php echo $gasto['gastos']; ?></span></td>
+															<td><span style="color: blue">(<?php echo $gasto['libros']; ?> libros)</span></td>
+														</tr>
+													<?php
+												}
+												?>
+													</tbody>
+												</table>
+											</div>
+		            					</div>
+		            				</div>
+								<?php
                 				}else if ($USER_REGISTER){
                 					
                 				}else if ($BOOK_PURCHASE){

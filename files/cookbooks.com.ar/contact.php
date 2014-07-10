@@ -17,7 +17,25 @@
                 	
                 </div>
                 <div class="col-md-8">
-                	<h1>Contact Page</h1>
+                	<div class="panel panel-primary">
+                	<h1></h1>
+                	
+                	<form action="send.php" method="post">
+                		
+                		<input type="text" name="asunto" /> <br/> <br/>
+                		
+                		
+                		<div class="row">
+		              
+                		<textarea name="mensaje"> </textarea>  <br/> <br/>
+                		</div>
+                		
+                		
+                		<input type="submit" value="Enviar Correo"/>
+                	
+                	</form>
+                	
+                	</div>
                 </div>
                 <div class="col-md-2">
                 	

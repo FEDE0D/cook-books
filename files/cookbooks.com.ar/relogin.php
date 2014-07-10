@@ -44,6 +44,7 @@
 		                			<div class="col-md-9"> 
 					                	<input name="password" id="password" type="password" placeholder="Password" class="form-control">
 					                </div>
+				                	<button type="button" onclick="window.location.href='#'" class="btn btn-link">¿Olvidaste tu contraseña?</button>
 				                </div>
 	            			</div>
 	            			<div class="panel-footer">

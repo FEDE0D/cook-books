@@ -159,14 +159,16 @@ class Users{
 	}
 	
 	/** Retorna un array de objetos User con todos los usuarios del sistema*/
-	static function getUsers(){
+	static function getUsers($orderByName = false){
 		self::initialize();
-		$result = self::$conexion->query("
+		$sql = "
 			SELECT U.username, U.password, U.nombre, U.apellido, U.direccion, U.mail, U.telefono, U.admin, U.fecha_alta, U.fecha_nac, U.enabled
 			FROM usuarios U
 			WHERE (U.admin=0)
-			ORDER BY U.enabled DESC, U.username ASC
-		");
+		";
+		if (!$orderByName) $sql .= "ORDER BY U.enabled DESC, U.username ASC";
+		else $sql .= "ORDER BY U.username"; 
+		$result = self::$conexion->query($sql);
 		$usuarios = array();
 		if ($result){
 			$result = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -264,6 +266,26 @@ class Users{
 		}else{
 			return FALSE;
 		}
+	}
+	
+	/** Retorna un Array[(username, gastos),...] con informacion sobre los gastos totales de cada usuario. $oderByExpenses si se quiere ordenar por gasto y no por username */
+	static function getUsersExpenses($oderByExpenses = false){
+		self::initialize();
+		$sql = "
+			SELECT U.username, sum(P.precio_unitario * P.cantidad) as gastos, sum(P.cantidad) as libros
+			FROM usuarios U
+			INNER JOIN compra C ON (U.username=C.username)
+			INNER JOIN pedidos P ON (C.id=P.id_compra)
+			WHERE (C.estado='efectuado')
+			GROUP BY (U.username)
+		";
+		if ($oderByExpenses) $sql .= "ORDER BY gastos DESC";
+		else $sql .= "ORDER BY U.username";
+		$sql = self::$conexion->query($sql);
+		if ($sql){
+			return $sql->fetchAll(PDO::FETCH_ASSOC);
+		}
+		return NULL;
 	}
 	
 	/**Retorna un objeto Usuario si existe un usuario logueado, NULL en caso contrario*/
@@ -1172,6 +1194,24 @@ class Compras{
 		}
 		
 		return $compras;self::$conexion->desconectar();
+	}
+	
+	/** Retorna un array de {month, year, total} */
+	static function getByMonth(){
+		self::initialize();
+		$sql = self::$conexion->query("
+			SELECT MONTH(C.fecha) as month, YEAR(C.fecha) as year, sum((P.precio_unitario * P.cantidad)) as subtotal
+			FROM compra C
+			INNER JOIN pedidos P ON (C.id=P.id_compra)
+			WHERE (C.estado='efectuado')
+			GROUP BY MONTH(C.fecha), YEAR(C.fecha)
+			ORDER BY month DESC, year DESC
+		");
+		if ($sql){
+			$sql = $sql->fetchAll(PDO::FETCH_ASSOC);
+			return $sql;
+		}
+		return array();
 	}
 	
 	/** Crea una compra en la base de datos. Recibe los articulos que están en el carrito. Retorna un objeto Compra */
