@@ -42,8 +42,11 @@
 			$Compra= Compras::getCompra($ID_compra);
 			}
 		}
+		
+		//FEDE
+		$FILTER_TEXT = isset($_REQUEST['fb'])? $_REQUEST['fb']:'';
+		
         ?>
-        
     </head>
     <body>
         <?php include_once('navigation.php'); ?>
@@ -58,13 +61,45 @@
                 	<div class="panel panel-default">
                 		<div class="panel-heading"><strong>Pedidos <?php echo $estado.'s' ?></strong></div>
                 		<div class="panel-body" style="max-height: 555px; min-height:400px; overflow-y: scroll;">
-                			<div class="list-group text-left">
+                			<div class="well">
+                				<input id="filter_box" type="text" class="form-control" />
+                				<script type="text/javascript">
+            						var filter = $("#filter_box");
+                					filter.keyup(function(){
+                						var list = $("#purchase_list");
+                						var text = filter.val();
+                						
+                						list.children().each(function(i){
+                							$(this).addClass("hidden");
+                						});
+                						
+                						var result = list.find(":contains("+text+")");
+                						result.each(function(i){
+                							$(this).removeClass("hidden");
+                						});
+                					});
+                					
+                					$(document).ready(function(){
+                						$("#filter_box").val('<?php echo $FILTER_TEXT; ?>');
+                						$("#filter_box").keyup();
+                					});
+                					
+                				</script>
+                			</div>
+                			<div id="purchase_list" class="list-group text-left">
                 					<?php
                 					$pos=0;
                 					$compras = Compras::getCompras(); 
 									foreach ($compras as $key => $value) { 
 										 if($value->getEstado()==$estado){ $pos++; ?>
-			                				<a href="admin_pedidos.php?<?php echo $estado."=".$value->getId(); ?>" class="list-group-item <?php if ($ID_compra==$value->getId()) echo 'active' ?>">
+			                				<a href="admin_pedidos.php?<?php echo $estado."=".$value->getId(); ?>" class="list-group-item <?php if ($ID_compra==$value->getId()) echo 'active' ?>" onclick="resolver(this)">
+			                					<script>
+			                						function resolver(elem){
+			                							var elem = $(elem);
+			                							var fb = $("#filter_box").val();
+			                							elem.attr("href",elem.attr("href")+'&fb='+fb);
+			                						}
+			                					</script>
 												<?php echo '#'.$pos.' Fecha: '.$value->getFecha().'.  '.$value->getUsername();  ?>
 												<span class="badge" title="Cantidad de libros"><?php echo $value->getCantidadLibros() ?></span>
 											</a>

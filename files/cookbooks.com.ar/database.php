@@ -158,16 +158,19 @@ class Users{
 		return NULL;
 	}
 	
-	/** Retorna un array de objetos User con todos los usuarios del sistema*/
-	static function getUsers($orderByName = false){
+	/** Retorna un array de objetos User con todos los usuarios del sistema.
+	 * Ordenado por Habilitados y Nombre de usuario.
+	 * $orderByName y $orderBySignUpDate para ordenar por otros criterios.*/
+	static function getUsers($orderByName = false, $orderBySignUpDate = false){
 		self::initialize();
 		$sql = "
 			SELECT U.username, U.password, U.nombre, U.apellido, U.direccion, U.mail, U.telefono, U.admin, U.fecha_alta, U.fecha_nac, U.enabled
 			FROM usuarios U
 			WHERE (U.admin=0)
 		";
-		if (!$orderByName) $sql .= "ORDER BY U.enabled DESC, U.username ASC";
-		else $sql .= "ORDER BY U.username"; 
+		if ($orderByName) $sql .= "ORDER BY U.username";
+		else if ($orderBySignUpDate) $sql.= "ORDER BY U.fecha_alta DESC";
+		else $sql .= "ORDER BY U.enabled DESC, U.username ASC";
 		$result = self::$conexion->query($sql);
 		$usuarios = array();
 		if ($result){
@@ -523,38 +526,63 @@ class Books{
 		return NULL;
 	}
 	
-	/** Devuelve un Array de objetos Book */
 	static function getBestSellers($cantidad){
 		self::initialize();
-		$result = self::$conexion->query("
-			SELECT T1.ISBN, T1.titulo, T1.autores, T1.paginas, T1.precio, T1.IDIOMA, T1.fecha, T1.etiquetas, T1.texto, T1.tapa, T1.eliminado, T1.hidden
-			FROM (
-					SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
-				    FROM libros L
-				    INNER JOIN escribe E ON (L.ISBN=E.isbn)
-				    WHERE (L.eliminado=0 AND L.hidden=0)
-				    GROUP BY E.isbn
-				) AS T1
-			INNER JOIN (
-					SELECT P.id, P.ISBN, sum(P.cantidad) as cantidad
-			        FROM pedidos P
-			        INNER JOIN compra C ON (P.id_compra=C.id)
-			        WHERE (C.estado='efectuado')
-			        GROUP BY (P.ISBN)
-			        ORDER BY cantidad DESC
-				)as T2 ON (T2.ISBN=T1.ISBN)
-			ORDER BY T2.cantidad DESC
-			LIMIT $cantidad
-		");
-		$resultado = Array();
-		if ($result){
-			$books = $result->fetchAll(PDO::FETCH_ASSOC);
-			foreach ($books as $num => $bookInfo) {
-				array_push($resultado, new Book($bookInfo));
+		$sql = "
+			SELECT P.ISBN, sum(P.cantidad) as ventas
+			FROM pedidos P
+			LEFT JOIN compra C ON (P.id_compra = C.id)
+			WHERE (C.estado='efectuado')
+			GROUP BY (P.ISBN)
+			ORDER BY ventas DESC, P.ISBN
+		";
+		if ($cantidad > 0) $sql .= "LIMIT $cantidad";
+		$sql = self::$conexion->query($sql);
+		$books = array();
+		if ($sql){
+			$sql = $sql->fetchAll(PDO::FETCH_ASSOC);
+			foreach ($sql as $key => $data) {
+				$book = Books::getBook($data['ISBN']);
+				$book->ventas = $data['ventas'];
+				array_push($books, $book);
 			}
 		}
-		return (Array)$resultado;
+		return $books;
 	}
+	
+	/** Devuelve un Array de objetos Book */
+	// static function getBestSellers($cantidad){
+		// self::initialize();
+		// $sql = "
+			// SELECT T1.ISBN, T1.titulo, T1.autores, T1.paginas, T1.precio, T1.IDIOMA, T1.fecha, T1.etiquetas, T1.texto, T1.tapa, T1.eliminado, T1.hidden, T2.cantidad
+			// FROM (
+					// SELECT L.ISBN, L.titulo, GROUP_CONCAT(E.id_autor) as autores, L.paginas, L.precio, L.IDIOMA, L.fecha, L.etiquetas, L.texto, L.tapa, L.eliminado, L.hidden
+				    // FROM libros L
+				    // INNER JOIN escribe E ON (L.ISBN=E.isbn)
+				    // WHERE (L.eliminado=0 AND L.hidden=0)
+				    // GROUP BY E.isbn
+				// ) AS T1
+			// INNER JOIN (
+					// SELECT P.id, P.ISBN, sum(P.cantidad) as cantidad
+			        // FROM pedidos P
+			        // INNER JOIN compra C ON (P.id_compra=C.id)
+			        // WHERE (C.estado='efectuado')
+			        // GROUP BY (P.ISBN)
+			        // ORDER BY cantidad DESC
+				// )as T2 ON (T2.ISBN=T1.ISBN)
+			// ORDER BY T2.cantidad DESC
+		// ";
+		// if ($cantidad > 0) $sql .= "LIMIT $cantidad";
+		// $result = self::$conexion->query($sql);
+		// $resultado = Array();
+		// if ($result){
+			// $books = $result->fetchAll(PDO::FETCH_ASSOC);
+			// foreach ($books as $num => $bookInfo) {
+				// array_push($resultado, new Book($bookInfo));
+			// }
+		// }
+		// return (Array)$resultado;
+	// }
 	
 	/** Devuelve la tabla de libros lista para mostrar en la pagina del catalogo (books.php)
 	 *	FIXME: Devolver nombre de autores concatenados
@@ -735,6 +763,9 @@ class Book{
 			$eliminado,
 			$oculto,
 			$autores; //es un string de id de autor separados por comas
+	
+	/** FIXME: no seguro! */
+	public $ventas;
 			
 	function __construct($param){
 		$this->ISBN = $param['ISBN'];

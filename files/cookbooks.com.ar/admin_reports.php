@@ -31,7 +31,7 @@
         <div class="container-fluid text-center">
             <div class="row">
                 <div class="col-md-3">
-                	<div class="panel panel-info">
+                	<div class="panel panel-warning">
                 		<div class="panel-heading">
                 			<strong>Reportes</strong>
                 		</div><!-- fin heading -->
@@ -164,6 +164,14 @@
 										</div>
 										<div class="panel-heading text-left"><strong>Todas las compras</strong></div>
 										<div class="panel-body">
+											<div class="container-fluid">
+												<div class="well-sm">
+													<label>Filtrar desde</label>
+													<input id="min_date" type="date" class="input-sm"/>
+													<label>hasta</label>
+													<input id="max_date" type="date" class="input-sm"/>
+												</div>
+											</div>
 											<table id="system_total_table" class="table table-striped table-bordered table-responsive" >
 												<thead class="text-center">
 													<th>id</th>
@@ -189,13 +197,32 @@
 												</tbody>
 											</table>
 											<script type="text/javascript">
+											
 												$(document).ready(function(){
-													var table = $("#system_total_table").dataTable({
+													
+													/* Agrego una nueva funcion de filtro para buscar entre fechas (Strings) */
+													$.fn.dataTable.ext.search.push(
+													    function( settings, data, dataIndex ) {
+													        var min = $('#min_date').val();
+													        var max = $('#max_date').val();
+													        var date = ( data[0] ) || '';
+													 
+													        if ( ( min == '' && max == '' ) ||
+													             ( min == '' && date <= max ) ||
+													             ( min <= date && '' == max ) ||
+													             ( min <= date && date <= max ) ){
+													            return true;
+													        }
+													        return false;
+													    }
+													);
+													
+													var table = $("#system_total_table").DataTable({
 														"language": {
 															"url": "website/datatables1.10.0/lang/Spanish.json"
 														},
 														info: false,
-														filter: false,
+														filter: true,
 														order: [0, "desc"],
 														"columnDefs": [
 															{
@@ -230,6 +257,11 @@
 															}
 														]
 													});
+													
+													$('#min_date, #max_date').change(function() {
+												        table.draw();
+												    });
+												    
 												});
 											</script>
 										</div>
@@ -259,7 +291,7 @@
 														foreach ($gastos as $key => $gasto) {
 														?>
 															<tr>
-																<td><a href="profile.php?u=<?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
+																<td><a href="admin_pedidos.php?efectuado&fb=<?php echo $gasto['username']; ?>" title="Ver todas las compras de <?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
 																<td><span style="color: red">$<?php echo $gasto['gastos']; ?></span></td>
 																<td><span style="color: blue">(<?php echo $gasto['libros']; ?> libros)</span></td>
 															</tr>
@@ -276,7 +308,8 @@
 											<?php
 												$gastos = Users::getUsersExpenses(FALSE);
 												?>
-												<table class="table table-responsive">
+												<br />
+												<table id="user_purchases_table" class="table table-responsive">
 													<thead>
 														<th>Usuario</th>
 														<th>Gasto total</th>
@@ -285,25 +318,206 @@
 													<tbody class="text-left">
 												<?php
 													foreach ($gastos as $key => $gasto) {
-													?>
+												?>
 														<tr>
-															<td><a href="profile.php?u=<?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
-															<td><span style="color: red">$<?php echo $gasto['gastos']; ?></span></td>
-															<td><span style="color: blue">(<?php echo $gasto['libros']; ?> libros)</span></td>
+															<td><a href="admin_pedidos.php?efectuado&fb=<?php echo $gasto['username']; ?>" title="Ver todas las compras de <?php echo $gasto['username']; ?>"><?php echo $gasto['username'] ?></a></td>
+															<td>$<?php echo $gasto['gastos']; ?></td>
+															<td><?php echo $gasto['libros']; ?></td>
 														</tr>
-													<?php
-												}
+												<?php
+													}
 												?>
 													</tbody>
 												</table>
+												<script type="text/javascript">
+													
+													$(document).ready(function(){
+														var table = $("#user_purchases_table").DataTable({
+															filter: false,
+															order: [2, "desc"]
+														});
+													});
+													
+												</script>
 											</div>
 		            					</div>
 		            				</div>
 								<?php
                 				}else if ($USER_REGISTER){
-                					
+                				?>
+                					<div class="panel panel-default">
+                						<label class="label label-default pull-left">Últimos usuarios registrados</label>
+                						<div class="panel-body">
+            							<?php
+            								
+            							?>
+            								<table class="table table-striped table-responsive">
+            									<thead>
+            										<th>Usuario</th>
+            										<th>Fecha de alta</th>
+            									</thead>
+            									<tbody class="text-left">
+        										<?php
+        											$registros = Users::getUsers(NULL, TRUE);
+													$registros = array_slice($registros, 0, 5);
+													
+													foreach ($registros as $key => $user) {
+													?>
+														<tr>
+															<td>
+																<a href="profile.php?u=<?php echo $user->getUsername(); ?>"><?php echo $user->getUsername(); ?></a>
+															</td>
+															<td><?php echo $user->getFechaAlta(); ?></td>
+														</tr>
+													<?php	
+													}
+        										?>
+            									</tbody>
+            								</table>
+                						</div>
+                					</div>
+                					<hr />
+                					<div class="panel panel-default">
+                						<label class="label label-default pull-left">Todos los registros de usuarios</label>
+                						<div class="panel-body">
+            							<?php
+            								
+            							?>
+            								<br />
+            								<div class="container-fluid">
+												<div class="well-sm">
+													<label>Filtrar desde</label>
+													<input id="min_date" type="date" class="input-sm"/>
+													<label>hasta</label>
+													<input id="max_date" type="date" class="input-sm"/>
+												</div>
+											</div>
+            								<table id="user_signup_table" class="table table-striped table-responsive">
+            									<thead>
+            										<th>Usuario</th>
+            										<th>Fecha de alta</th>
+            									</thead>
+            									<tbody class="text-left">
+        										<?php
+        											$registros = Users::getUsers(NULL, TRUE);
+													
+													foreach ($registros as $key => $user) {
+													?>
+														<tr>
+															<td>
+																<a href="profile.php?u=<?php echo $user->getUsername(); ?>"><?php echo $user->getUsername(); ?></a>
+															</td>
+															<td><?php echo $user->getFechaAlta(); ?></td>
+														</tr>
+													<?php	
+													}
+        										?>
+            									</tbody>
+            								</table>
+            								<script type="text/javascript">
+            									$(document).ready(function(){
+            										
+            										/* Agrego una nueva funcion de filtro para buscar entre fechas (Strings) */
+													$.fn.dataTable.ext.search.push(
+													    function( settings, data, dataIndex ) {
+													        var min = $('#min_date').val();
+													        var max = $('#max_date').val();
+													        var date = ( data[1] ) || '';
+													 
+													        if ( ( min == '' && max == '' ) ||
+													             ( min == '' && date <= max ) ||
+													             ( min <= date && '' == max ) ||
+													             ( min <= date && date <= max ) ){
+													            return true;
+													        }
+													        return false;
+													    }
+													);
+            										
+            										var table = $("#user_signup_table").DataTable();
+            										
+            										$('#min_date, #max_date').change(function() {
+												        table.draw();
+												    });
+            										
+            									});
+            								</script>
+                						</div>
+                					</div>
+                				<?php
                 				}else if ($BOOK_PURCHASE){
-                					
+                				?>
+                					<div class="panel panel-default">
+                						<label class="label label-default pull-left">Los libros más vendidos</label>
+                						<div class="panel-body text-left">
+            							<?php
+            								$ventas = Books::getBestSellers(5)
+											
+										?>
+											<table class="table table-responsive table-striped">
+												<thead>
+													<th>Título</th>
+													<th>Precio</th>
+													<th>Ventas</th>
+												</thead>
+												<tbody>
+												<?php
+													foreach ($ventas as $key => $book) {
+													?>
+														<tr>
+															<td><a href="admin_books.php?id=<?php echo $book->getISBN(); ?>" target="_blank"><?php echo $book->getTitulo(); ?></a></td>
+															<td>$<?php echo $book->getPrecio(); ?></td>
+															<td><?php echo $book->ventas; ?></td>
+														</tr>
+													<?php
+													}
+		            							?>
+												</tbody>
+											</table>
+                						</div>
+                					</div>
+                					<hr />
+                					<div class="panel panel-default">
+                						<label class="label label-default pull-left">Todos los libros</label>
+                						<div class="panel-body text-left">
+            							<?php
+            								$ventas = Books::getBestSellers(0)
+											
+										?>
+											<table id="book_sales_table" class="table table-responsive table-striped">
+												<thead>
+													<th>Título</th>
+													<th>Ventas</th>
+													<th>Precio</th>
+													<th>Total</th>
+												</thead>
+												<tbody>
+												<?php
+													foreach ($ventas as $key => $book) {
+													?>
+														<tr>
+															<td><a href="admin_books.php?id=<?php echo $book->getISBN(); ?>" target="_blank"><?php echo $book->getTitulo(); ?></a></td>
+															<td><?php echo $book->ventas; ?></td>
+															<td>$<?php echo $book->getPrecio(); ?></td>
+															<td>$<?php echo $book->ventas * $book->getPrecio(); ?></td>
+														</tr>
+													<?php
+													}
+		            							?>
+												</tbody>
+											</table>
+											<script type="text/javascript">
+												$(document).ready(function(){
+													var table = $("#book_sales_table").DataTable({
+														filter: false,
+														order: [1, "desc"],
+													});
+													
+												});
+											</script>
+                						</div>
+                					</div>
+                				<?php
                 				}
                 			?>
                 		</div>
